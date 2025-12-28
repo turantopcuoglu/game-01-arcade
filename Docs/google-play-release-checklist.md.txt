@@ -1,0 +1,27 @@
+# Google Play Release Checklist (Template)
+
+## Build
+- [ ] Unity 2022 LTS
+- [ ] Android: IL2CPP
+- [ ] Target Architectures: ARM64 only (recommended)
+- [ ] Auto Graphics API OFF; Vulkan + OpenGLES3 fallback
+- [ ] Target Frame Rate: 60
+- [ ] No gameplay Instantiate/Destroy (pooling)
+
+## App Settings
+- [ ] Package name set (com.company.game)
+- [ ] VersionName / VersionCode updated
+- [ ] Portrait/Orientation correct
+- [ ] App icon / feature graphic placeholders ready
+
+## Privacy & Policy
+- [ ] Privacy Policy URL prepared (even if no data collected)
+- [ ] Data safety form draft prepared
+- [ ] No prohibited content / misleading claims
+- [ ] Permissions minimized (no unnecessary permissions)
+
+## QA
+- [ ] No red errors in Console
+- [ ] Run 10 minutes gameplay: no FPS drops / no spikes
+- [ ] Pause/Resume works (home button, background/foreground)
+- [ ] Settings persistence works (Sound/Vibration)
