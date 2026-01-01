@@ -148,8 +148,11 @@ namespace Project.Core
 
 			public void Enter()
 			{
+				var spawner = GameObject.FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
+				if (spawner != null) spawner.StopSpawn();
+
 				Debug.Log("[State] GameOver Enter");
-				Time.timeScale = 0f;
+				//Time.timeScale = 0f;
 			}
 
 			public void Exit()
