@@ -97,9 +97,18 @@ namespace Project.Core
 			{
 				Debug.Log("[State] Gameplay Enter");
 				Time.timeScale = 1f;
+				var spawner = GameObject.FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
+				if (spawner != null) spawner.StartSpawn();
+
 			}
 
-			public void Exit() => Debug.Log("[State] Gameplay Exit");
+			public void Exit() 
+			{
+				Debug.Log("[State] Gameplay Exit");
+				var spawner = GameObject.FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
+				if (spawner != null) spawner.StopSpawn();
+
+			}
 
 			public void Tick(float dt)
 			{
