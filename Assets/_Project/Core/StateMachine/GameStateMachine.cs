@@ -1,15 +1,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Project.Core
 {
 	public sealed class GameStateMachine
 	{
-		private readonly Dictionary<GameStateId, IGameState> _states = new();
+		public GameStateId CurrentId { get; private set; } = GameStateId.None;
 		private IGameState _current;
+		private readonly Dictionary<GameStateId, IGameState> _states = new();
 
-		public GameStateId CurrentId => _current?.Id ?? GameStateId.Boot;
 
 		public event Action<GameStateId> OnStateChanged;
 
@@ -18,20 +19,34 @@ namespace Project.Core
 			_states[state.Id] = state;
 		}
 
-		public void ChangeState(GameStateId id)
+		public void ChangeState(GameStateId next, bool force = false)
 		{
-			if (_current != null && _current.Id == id) return;
+			Debug.Log($"[SM] ChangeState {CurrentId} -> {next} (force={force})");
+
+			if (!force && CurrentId != GameStateId.None && CurrentId == next)
+			{
+				Debug.Log("[SM] ChangeState ignored: already in target state");
+				return;
+			}
+
+			if (!_states.TryGetValue(next, out var nextState))
+			{
+				Debug.LogError($"[SM] Target state not registered: {next}");
+				return;
+			}
 
 			_current?.Exit();
 
-			if (!_states.TryGetValue(id, out var next))
-				throw new InvalidOperationException($"State not registered: {id}");
+			_current = nextState;
+			CurrentId = next;
 
-			_current = next;
+			OnStateChanged?.Invoke(CurrentId);
+
 			_current.Enter();
-
-			OnStateChanged?.Invoke(id);
 		}
+
+
+
 
 		public void Tick(float dt)
 		{

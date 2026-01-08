@@ -11,6 +11,11 @@ namespace Project.Gameplay
 		{
 			_dead = false;
 		}
+		public void ResetHitbox()
+		{
+			Debug.Log("PlayerHitbox Reset");
+			_dead = false;
+		}
 
 		private void OnTriggerEnter(Collider other)
 		{

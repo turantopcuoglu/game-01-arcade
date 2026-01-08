@@ -1,26 +1,32 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Project.Core;
 using Project.Systems.Input;
-using Project.Systems.Haptics;
-using Project.Audio;
 
 namespace Project.UI
 {
 	public class TapToStart : MonoBehaviour
 	{
-		private void OnEnable() => InputRouter.Instance.OnTapScreen += HandleTap;
+		private void OnEnable()
+		{
+			InputRouter.Instance.OnTapScreen += OnTap;
+		}
 
 		private void OnDisable()
 		{
 			if (InputRouter.Instance != null)
-				InputRouter.Instance.OnTapScreen -= HandleTap;
+				InputRouter.Instance.OnTapScreen -= OnTap;
 		}
 
-		private void HandleTap(Vector2 screenPos)
+		private void OnTap(Vector2 screenPos)
 		{
-			// Click hissi paketi
-			AudioService.Instance?.PlayClick(0.7f);
-			Haptics.Click();
+			// 1) UI üzerindeyse ignore (butonlara basýnca oyunu baþlatma!)
+			if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+				return;
+
+			// 2) Sadece Menu state'te start
+			if (GameManager.Instance.CurrentState != GameStateId.Menu)
+				return;
 
 			GameManager.Instance.StartGame();
 		}

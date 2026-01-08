@@ -2,10 +2,12 @@ namespace Project.Core
 {
 	public enum GameStateId
 	{
-		Boot = 0,
-		Menu = 1,
-		Gameplay = 2,
-		Pause = 3,
-		GameOver = 4
+		None = 0,
+		Boot = 1,
+		Menu = 2,
+		Gameplay = 3,
+		Pause = 4,
+		GameOver = 5
 	}
+
 }

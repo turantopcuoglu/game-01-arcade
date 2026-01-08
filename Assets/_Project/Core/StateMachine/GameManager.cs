@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace Project.Core
@@ -23,35 +24,108 @@ namespace Project.Core
 
 			_sm = new GameStateMachine();
 
-			// Register states (bugün inline basit tutuyoruz)
+			// Register states
 			_sm.Register(new BootState(_sm));
 			_sm.Register(new MenuState(_sm));
 			_sm.Register(new GameplayState(_sm));
 			_sm.Register(new PauseState(_sm));
 			_sm.Register(new GameOverState(_sm));
 
+			Debug.Log($"[GM] Awake InstanceID={GetInstanceID()}");
+
 			_sm.ChangeState(GameStateId.Boot);
 		}
+
+		private void Update()
+		{
+			_sm.Tick(Time.deltaTime);
+		}
+
+		// -------- Public API (UI / Input) --------
+
+		public void StartGame()
+		{
+			Time.timeScale = 1f;
+
+			PrepareNewRun();
+
+			// force re-enter: Gameplay'deyken bile Enter tekrar çalýþsýn
+			_sm.ChangeState(GameStateId.Gameplay, force: true);
+		}
+
+
+		public void OpenMenu()
+		{
+			Time.timeScale = 1f;
+
+			// Leaving a run -> clean scene
+			CleanupRun();
+
+			_sm.ChangeState(GameStateId.Menu);
+		}
+
 		public void TogglePause()
 		{
 			if (CurrentState == GameStateId.Gameplay) Pause();
 			else if (CurrentState == GameStateId.Pause) Resume();
 		}
 
-		private void Update()
+		public void Pause() => _sm.ChangeState(GameStateId.Pause);
+
+		public void Resume()
 		{
-			// KURAL: Tick sadece aktif state’e gider.
-			_sm.Tick(Time.deltaTime);
+			Time.timeScale = 1f;
+			_sm.ChangeState(GameStateId.Gameplay);
 		}
 
-		// UI / Input buradan state deðiþtirecek
-		public void StartGame() => _sm.ChangeState(GameStateId.Gameplay);
-		public void OpenMenu() => _sm.ChangeState(GameStateId.Menu);
-		public void Pause() => _sm.ChangeState(GameStateId.Pause);
 		public void GameOver() => _sm.ChangeState(GameStateId.GameOver);
-		public void Resume() => _sm.ChangeState(GameStateId.Gameplay);
 
-		// --- Minimal State implementations (Gün 2 için tek dosyada da olur ama biz düzgün gidiyoruz) ---
+		// Optional alias (if some UI still calls RestartRun)
+		public void RestartRun() => StartGame();
+
+		// -------- Run Lifecycle (single source of truth) --------
+
+		private void PrepareNewRun()
+		{
+			// 1) Return active pooled objects (fresh start)
+			var cleaner = FindObjectOfType<Project.Gameplay.PooledObjectsCleaner>();
+			cleaner?.ResetAll();
+
+			// 2) Stop spawners before re-starting (safety)
+			var obstacleSpawner = FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
+			obstacleSpawner?.StopSpawn();
+
+			// 3) Reset gameplay systems (optional if not present yet)
+			var diff = FindObjectOfType<Project.Gameplay.DifficultyController>();
+			diff?.ResetDifficulty();
+
+			var coinSpawner = FindObjectOfType<Project.Gameplay.CoinSpawner>();
+			coinSpawner?.ResetSpawner();
+
+			// 4) Reset session (coins/score)
+			Project.Gameplay.RunSession.Instance?.ResetSession();
+
+			// 5) Reset player input state (critical)
+			var playerCtrl = FindObjectOfType<Project.Gameplay.PlayerRunnerController>();
+			playerCtrl?.ResetController();
+
+			var hitbox = FindObjectOfType<Project.Gameplay.PlayerHitbox>();
+			hitbox?.ResetHitbox();
+		}
+
+		private void CleanupRun()
+		{
+			// 1) Stop spawners (leaving gameplay)
+			var obstacleSpawner = FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
+			obstacleSpawner?.StopSpawn();
+
+			// 2) Return active pooled objects (clean menu)
+			var cleaner = FindObjectOfType<Project.Gameplay.PooledObjectsCleaner>();
+			cleaner?.ResetAll();
+		}
+
+		// -------- Minimal State implementations --------
+
 		private sealed class BootState : IGameState
 		{
 			private readonly GameStateMachine _sm;
@@ -62,7 +136,9 @@ namespace Project.Core
 			public void Enter()
 			{
 				Debug.Log("[State] Boot Enter");
-				// Ýleride: service init, save init, ads/analytics stub vs.
+				Time.timeScale = 1f;
+
+				// Future: init services (save, analytics, ads). For now go to menu.
 				_sm.ChangeState(GameStateId.Menu);
 			}
 
@@ -77,13 +153,14 @@ namespace Project.Core
 
 			public MenuState(GameStateMachine sm) => _sm = sm;
 
-			public void Enter() => Debug.Log("[State] Menu Enter");
-			public void Exit() => Debug.Log("[State] Menu Exit");
-
-			public void Tick(float dt)
+			public void Enter()
 			{
-				// Þimdilik boþ. UI butonu StartGame() çaðýracak.
+				Debug.Log("[State] Menu Enter");
+				Time.timeScale = 1f;
 			}
+
+			public void Exit() => Debug.Log("[State] Menu Exit");
+			public void Tick(float dt) { }
 		}
 
 		private sealed class GameplayState : IGameState
@@ -97,24 +174,21 @@ namespace Project.Core
 			{
 				Debug.Log("[State] Gameplay Enter");
 				Time.timeScale = 1f;
-				var spawner = GameObject.FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
-				if (spawner != null) spawner.StartSpawn();
 
+				// Start spawn loop
+				var spawner = FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
+				spawner?.StartSpawn();
 			}
 
-			public void Exit() 
+			public void Exit()
 			{
 				Debug.Log("[State] Gameplay Exit");
-				var spawner = GameObject.FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
-				if (spawner != null) spawner.StopSpawn();
 
+				var spawner = FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
+				spawner?.StopSpawn();
 			}
 
-			public void Tick(float dt)
-			{
-				// Bugün test için basit log:
-				// Debug.Log("[State] Gameplay Tick"); // spam yapma, gerekirse aç
-			}
+			public void Tick(float dt) { }
 		}
 
 		private sealed class PauseState : IGameState
@@ -148,11 +222,13 @@ namespace Project.Core
 
 			public void Enter()
 			{
-				var spawner = GameObject.FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
-				if (spawner != null) spawner.StopSpawn();
-
 				Debug.Log("[State] GameOver Enter");
-				//Time.timeScale = 0f;
+
+				// Stop spawn loop immediately
+				var spawner = FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
+				spawner?.StopSpawn();
+
+				Time.timeScale = 0f;
 			}
 
 			public void Exit()

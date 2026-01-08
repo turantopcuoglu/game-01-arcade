@@ -21,6 +21,11 @@ namespace Project.Gameplay
 		[Header("Tuning")]
 		[SerializeField] private float obstacleSpeed = 6f;
 
+		[SerializeField] private DifficultyController difficulty;
+		[SerializeField] private CoinSpawner coinSpawner;
+
+
+
 		private float _t;
 		private bool _running;
 
@@ -39,8 +44,9 @@ namespace Project.Gameplay
 		{
 			if (!_running) return;
 
+			float interval = difficulty != null ? difficulty.CurrentInterval : spawnInterval;
 			_t += Time.deltaTime;
-			if (_t >= spawnInterval)
+			if (_t >= interval)
 			{
 				_t = 0f;
 				Spawn();
@@ -58,9 +64,14 @@ namespace Project.Gameplay
 			go.transform.position = new Vector3(x, 0.75f, spawnZ);
 			go.transform.rotation = Quaternion.identity;
 
+			float speed = difficulty != null ? difficulty.CurrentSpeed : obstacleSpeed;
 			var mover = go.GetComponent<ObstacleMover>();
 			if (mover != null)
-				mover.Init(obstaclePool, obstacleSpeed, despawnZ);
+				mover.Init(obstaclePool, speed, despawnZ);
+
+			if (coinSpawner != null)
+				coinSpawner.TrySpawnForObstacle(x, spawnZ);
+
 		}
 	}
 }
