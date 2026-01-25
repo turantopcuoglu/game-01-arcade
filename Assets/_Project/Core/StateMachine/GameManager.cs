@@ -49,7 +49,7 @@ namespace Project.Core
 
 			PrepareNewRun();
 
-			// force re-enter: Gameplay'deyken bile Enter tekrar çalýþsýn
+			// force re-enter: Gameplay'deyken bile Enter tekrar ï¿½alï¿½ï¿½sï¿½n
 			_sm.ChangeState(GameStateId.Gameplay, force: true);
 		}
 
@@ -119,6 +119,9 @@ namespace Project.Core
 			var obstacleSpawner = FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
 			obstacleSpawner?.StopSpawn();
 
+			var coinSpawner = FindObjectOfType<Project.Gameplay.CoinSpawner>();
+			coinSpawner?.StopSpawn();
+
 			// 2) Return active pooled objects (clean menu)
 			var cleaner = FindObjectOfType<Project.Gameplay.PooledObjectsCleaner>();
 			cleaner?.ResetAll();
@@ -175,17 +178,23 @@ namespace Project.Core
 				Debug.Log("[State] Gameplay Enter");
 				Time.timeScale = 1f;
 
-				// Start spawn loop
-				var spawner = FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
-				spawner?.StartSpawn();
+				// Start spawn loops
+				var obstacleSpawner = FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
+				obstacleSpawner?.StartSpawn();
+
+				var coinSpawner = FindObjectOfType<Project.Gameplay.CoinSpawner>();
+				coinSpawner?.StartSpawn();
 			}
 
 			public void Exit()
 			{
 				Debug.Log("[State] Gameplay Exit");
 
-				var spawner = FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
-				spawner?.StopSpawn();
+				var obstacleSpawner = FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
+				obstacleSpawner?.StopSpawn();
+
+				var coinSpawner = FindObjectOfType<Project.Gameplay.CoinSpawner>();
+				coinSpawner?.StopSpawn();
 			}
 
 			public void Tick(float dt) { }
@@ -224,9 +233,12 @@ namespace Project.Core
 			{
 				Debug.Log("[State] GameOver Enter");
 
-				// Stop spawn loop immediately
-				var spawner = FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
-				spawner?.StopSpawn();
+				// Stop spawn loops immediately
+				var obstacleSpawner = FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
+				obstacleSpawner?.StopSpawn();
+
+				var coinSpawner = FindObjectOfType<Project.Gameplay.CoinSpawner>();
+				coinSpawner?.StopSpawn();
 
 				Time.timeScale = 0f;
 			}
