@@ -1,5 +1,7 @@
 using UnityEngine;
 using Project.Core;
+using Project.Audio;
+using Project.Systems.Haptics;
 
 namespace Project.Gameplay
 {
@@ -11,6 +13,7 @@ namespace Project.Gameplay
 		{
 			_dead = false;
 		}
+
 		public void ResetHitbox()
 		{
 			Debug.Log("PlayerHitbox Reset");
@@ -21,10 +24,15 @@ namespace Project.Gameplay
 		{
 			if (_dead) return;
 
-			// obstacle mý? (ObstacleMover varlýðý yeterli)
 			if (other.GetComponent<ObstacleMover>() == null) return;
 
 			_dead = true;
+
+			// Collision feedback
+			CameraShake.Instance?.ShakeMedium();
+			Haptics.Impact();
+			AudioService.Instance?.PlayCollision();
+
 			GameManager.Instance.GameOver();
 		}
 	}

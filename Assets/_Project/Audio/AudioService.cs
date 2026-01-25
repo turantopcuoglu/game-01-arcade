@@ -9,6 +9,8 @@ namespace Project.Audio
 
 		[Header("Clips")]
 		[SerializeField] private AudioClip clickClip;
+		[SerializeField] private AudioClip coinPickupClip;
+		[SerializeField] private AudioClip collisionClip;
 
 		private AudioSource _sfxSource;
 
@@ -18,13 +20,12 @@ namespace Project.Audio
 			Instance = this;
 			DontDestroyOnLoad(gameObject);
 
-			// SFX source her zaman garanti olsun
 			_sfxSource = GetComponent<AudioSource>();
 			if (_sfxSource == null) _sfxSource = gameObject.AddComponent<AudioSource>();
 
 			_sfxSource.playOnAwake = false;
 			_sfxSource.loop = false;
-			_sfxSource.spatialBlend = 0f; // 2D
+			_sfxSource.spatialBlend = 0f;
 		}
 
 		public void PlayOneShot(AudioClip clip, float volume = 1f)
@@ -33,12 +34,21 @@ namespace Project.Audio
 			if (clip == null) return;
 
 			_sfxSource.PlayOneShot(clip, Mathf.Clamp01(volume));
-			Debug.Log("Tap Audio played");
 		}
 
 		public void PlayClick(float volume = 0.7f)
 		{
 			PlayOneShot(clickClip, volume);
+		}
+
+		public void PlayCoinPickup(float volume = 0.6f)
+		{
+			PlayOneShot(coinPickupClip, volume);
+		}
+
+		public void PlayCollision(float volume = 0.8f)
+		{
+			PlayOneShot(collisionClip, volume);
 		}
 	}
 }
