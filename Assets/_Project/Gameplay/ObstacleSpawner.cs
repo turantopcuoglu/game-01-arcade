@@ -11,7 +11,7 @@ namespace Project.Gameplay
 
 		[Header("Spawn")]
 		[SerializeField] private float spawnInterval = 1.2f;
-		[SerializeField] private float spawnZ = 14f;
+		[SerializeField] private float spawnZ = 30f;  // Spawn from far away
 		[SerializeField] private float despawnZ = -12f;
 
 		[Header("Lane Range")]
@@ -22,12 +22,13 @@ namespace Project.Gameplay
 		[SerializeField] private float obstacleSpeed = 6f;
 
 		[SerializeField] private DifficultyController difficulty;
-		[SerializeField] private CoinSpawner coinSpawner;
-
-
 
 		private float _t;
 		private bool _running;
+
+		// Track last spawned obstacle position for coin spawner to avoid
+		public float LastObstacleX { get; private set; }
+		public float SpawnZ => spawnZ;
 
 		public void StartSpawn()
 		{
@@ -64,14 +65,12 @@ namespace Project.Gameplay
 			go.transform.position = new Vector3(x, 0.75f, spawnZ);
 			go.transform.rotation = Quaternion.identity;
 
+			LastObstacleX = x;
+
 			float speed = difficulty != null ? difficulty.CurrentSpeed : obstacleSpeed;
 			var mover = go.GetComponent<ObstacleMover>();
 			if (mover != null)
 				mover.Init(obstaclePool, speed, despawnZ);
-
-			if (coinSpawner != null)
-				coinSpawner.TrySpawnForObstacle(x, spawnZ);
-
 		}
 	}
 }
