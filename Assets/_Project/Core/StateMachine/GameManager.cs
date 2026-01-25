@@ -1,5 +1,5 @@
-using System.Collections;
 using UnityEngine;
+using Project.Gameplay.Spawning;
 
 namespace Project.Core
 {
@@ -92,17 +92,22 @@ namespace Project.Core
 			cleaner?.ResetAll();
 
 			// 2) Stop spawners before re-starting (safety)
+			var chunkManager = FindObjectOfType<ChunkManager>();
+			chunkManager?.StopSpawning();
+			chunkManager?.ResetManager();
+
+			// Legacy spawner support (fallback if ChunkManager not present)
 			var obstacleSpawner = FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
 			obstacleSpawner?.StopSpawn();
-
-			// 3) Reset gameplay systems (optional if not present yet)
-			var diff = FindObjectOfType<Project.Gameplay.DifficultyController>();
-			diff?.ResetDifficulty();
 
 			var coinSpawner = FindObjectOfType<Project.Gameplay.CoinSpawner>();
 			coinSpawner?.ResetSpawner();
 
-			// 4) Reset session (coins/score)
+			// 3) Reset gameplay systems
+			var diff = FindObjectOfType<Project.Gameplay.DifficultyController>();
+			diff?.ResetDifficulty();
+
+			// 4) Reset session (coins/score) - also resets combo
 			Project.Gameplay.RunSession.Instance?.ResetSession();
 
 			// 5) Reset player input state (critical)
@@ -116,6 +121,10 @@ namespace Project.Core
 		private void CleanupRun()
 		{
 			// 1) Stop spawners (leaving gameplay)
+			var chunkManager = FindObjectOfType<ChunkManager>();
+			chunkManager?.StopSpawning();
+
+			// Legacy spawner support
 			var obstacleSpawner = FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
 			obstacleSpawner?.StopSpawn();
 
@@ -178,18 +187,31 @@ namespace Project.Core
 				Debug.Log("[State] Gameplay Enter");
 				Time.timeScale = 1f;
 
-				// Start spawn loops
-				var obstacleSpawner = FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
-				obstacleSpawner?.StartSpawn();
+				// Prefer ChunkManager (new pattern-based system)
+				var chunkManager = FindObjectOfType<ChunkManager>();
+				if (chunkManager != null)
+				{
+					chunkManager.StartSpawning();
+				}
+				else
+				{
+					// Fallback to legacy spawners
+					var obstacleSpawner = FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
+					obstacleSpawner?.StartSpawn();
 
-				var coinSpawner = FindObjectOfType<Project.Gameplay.CoinSpawner>();
-				coinSpawner?.StartSpawn();
+					var coinSpawner = FindObjectOfType<Project.Gameplay.CoinSpawner>();
+					coinSpawner?.StartSpawn();
+				}
 			}
 
 			public void Exit()
 			{
 				Debug.Log("[State] Gameplay Exit");
 
+				var chunkManager = FindObjectOfType<ChunkManager>();
+				chunkManager?.StopSpawning();
+
+				// Also stop legacy spawners (safety)
 				var obstacleSpawner = FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
 				obstacleSpawner?.StopSpawn();
 
@@ -234,6 +256,9 @@ namespace Project.Core
 				Debug.Log("[State] GameOver Enter");
 
 				// Stop spawn loops immediately
+				var chunkManager = FindObjectOfType<ChunkManager>();
+				chunkManager?.StopSpawning();
+
 				var obstacleSpawner = FindObjectOfType<Project.Gameplay.ObstacleSpawner>();
 				obstacleSpawner?.StopSpawn();
 

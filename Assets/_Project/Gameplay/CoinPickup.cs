@@ -36,19 +36,23 @@ namespace Project.Gameplay
 
 			_collecting = true;
 
-			// Add coin immediately
-			RunSession.Instance.AddCoin(1);
+			// Add coin with combo multiplier
+			int coinValue = RunSession.Instance.AddCoin();
 
-			// Feedback
+			// Feedback - intensity based on combo
 			Haptics.CoinPickup();
 			AudioService.Instance?.PlayCoinPickup();
 
-			// Pop VFX then return to pool
-			StartCoroutine(PopAndReturn());
+			// Pop VFX then return to pool (scale based on value)
+			StartCoroutine(PopAndReturn(coinValue));
 		}
 
-		private IEnumerator PopAndReturn()
+		private IEnumerator PopAndReturn(int coinValue = 1)
 		{
+			// Scale pop effect based on coin value (combo tier)
+			float valueMultiplier = 1f + (coinValue - 1) * 0.15f;  // 1x, 1.15x, 1.3x, 1.45x
+			float actualPopScale = popScale * valueMultiplier;
+
 			// Quick scale up
 			float elapsed = 0f;
 			float halfDuration = popDuration * 0.5f;
@@ -56,14 +60,14 @@ namespace Project.Gameplay
 			while (elapsed < halfDuration)
 			{
 				float t = elapsed / halfDuration;
-				transform.localScale = Vector3.Lerp(_originalScale, _originalScale * popScale, t);
+				transform.localScale = Vector3.Lerp(_originalScale, _originalScale * actualPopScale, t);
 				elapsed += Time.deltaTime;
 				yield return null;
 			}
 
 			// Quick scale down to zero
 			elapsed = 0f;
-			Vector3 peakScale = _originalScale * popScale;
+			Vector3 peakScale = _originalScale * actualPopScale;
 
 			while (elapsed < halfDuration)
 			{
