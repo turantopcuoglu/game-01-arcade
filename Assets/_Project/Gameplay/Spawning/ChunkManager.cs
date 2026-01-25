@@ -143,7 +143,7 @@ namespace Project.Gameplay.Spawning
 
 		private void StartNewChunk()
 		{
-			float chunkLength = Random.Range(minChunkLength, maxChunkLength);
+			float chunkLength = UnityEngine.Random.Range(minChunkLength, maxChunkLength);
 			float currentDifficulty = difficulty != null ? difficulty.CurrentSpeed / 11f : 0.5f;
 
 			// Check for rush segment
