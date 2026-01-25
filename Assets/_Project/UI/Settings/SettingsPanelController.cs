@@ -4,10 +4,13 @@ using Project.Systems.Save;
 
 namespace Project.UI
 {
+	/// <summary>
+	/// Settings panel controller - handles sound and vibration toggles.
+	/// This panel is an overlay and can be opened from any screen.
+	/// </summary>
 	public class SettingsPanelController : MonoBehaviour
 	{
-		[Header("UI")]
-		[SerializeField] private GameObject panelRoot;
+		[Header("Toggles")]
 		[SerializeField] private Toggle soundToggle;
 		[SerializeField] private Toggle vibrationToggle;
 
@@ -15,37 +18,30 @@ namespace Project.UI
 
 		private void OnEnable()
 		{
-			if (panelRoot != null) panelRoot.SetActive(false);
-
 			BindFromData();
 
-			if (soundToggle != null) soundToggle.onValueChanged.AddListener(OnSoundChanged);
-			if (vibrationToggle != null) vibrationToggle.onValueChanged.AddListener(OnVibrationChanged);
+			if (soundToggle != null)
+				soundToggle.onValueChanged.AddListener(OnSoundChanged);
+			if (vibrationToggle != null)
+				vibrationToggle.onValueChanged.AddListener(OnVibrationChanged);
 		}
 
 		private void OnDisable()
 		{
-			if (soundToggle != null) soundToggle.onValueChanged.RemoveListener(OnSoundChanged);
-			if (vibrationToggle != null) vibrationToggle.onValueChanged.RemoveListener(OnVibrationChanged);
-		}
-
-		public void Open()
-		{
-			BindFromData();
-			if (panelRoot != null) panelRoot.SetActive(true);
-		}
-
-		public void Close()
-		{
-			if (panelRoot != null) panelRoot.SetActive(false);
+			if (soundToggle != null)
+				soundToggle.onValueChanged.RemoveListener(OnSoundChanged);
+			if (vibrationToggle != null)
+				vibrationToggle.onValueChanged.RemoveListener(OnVibrationChanged);
 		}
 
 		private void BindFromData()
 		{
 			_binding = true;
 
-			if (soundToggle != null) soundToggle.isOn = SettingsData.Sound;
-			if (vibrationToggle != null) vibrationToggle.isOn = SettingsData.Vibration;
+			if (soundToggle != null)
+				soundToggle.isOn = SettingsData.Sound;
+			if (vibrationToggle != null)
+				vibrationToggle.isOn = SettingsData.Vibration;
 
 			_binding = false;
 		}
@@ -54,12 +50,22 @@ namespace Project.UI
 		{
 			if (_binding) return;
 			SettingsData.Sound = value;
+			Debug.Log($"[Settings] Sound: {value}");
 		}
 
 		private void OnVibrationChanged(bool value)
 		{
 			if (_binding) return;
 			SettingsData.Vibration = value;
+			Debug.Log($"[Settings] Vibration: {value}");
+		}
+
+		// -------- UI Button Callbacks --------
+
+		public void OnCloseClicked()
+		{
+			Debug.Log("[UI] Settings close clicked");
+			UIManager.Instance?.OnSettingsCloseClicked();
 		}
 	}
 }

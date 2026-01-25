@@ -1,40 +1,64 @@
 using UnityEngine;
+using TMPro;
 using Project.Core;
 using Project.Gameplay;
 
 namespace Project.UI
 {
+	/// <summary>
+	/// GameOver panel controller - displays final score and best score.
+	/// Panel visibility is managed by UIManager.
+	/// </summary>
 	public class GameOverPanelController : MonoBehaviour
 	{
-		[SerializeField] private GameObject panelRoot;
+		[Header("Score Display")]
+		[SerializeField] private TMP_Text scoreText;
+		[SerializeField] private TMP_Text bestScoreText;
+		[SerializeField] private TMP_Text gameOverText;
 
-		private void Awake()
+		[Header("Optional New Best Indicator")]
+		[SerializeField] private GameObject newBestIndicator;
+
+		private void OnEnable()
 		{
-			if (panelRoot == null) panelRoot = gameObject;
+			RefreshScoreDisplay();
 		}
 
-		private void Update()
+		/// <summary>
+		/// Updates score display when panel becomes visible.
+		/// </summary>
+		private void RefreshScoreDisplay()
 		{
-			var gm = GameManager.Instance;
-			if (gm == null) return;
+			var session = RunSession.Instance;
+			if (session == null) return;
 
-			bool show = gm.CurrentState == GameStateId.GameOver;
-			if (panelRoot.activeSelf != show) panelRoot.SetActive(show);
+			// Update best score before displaying
+			int scoreBefore = session.BestScore;
+			session.TryUpdateBestScore();
+			bool isNewBest = session.Score > scoreBefore && scoreBefore > 0;
+
+			if (scoreText != null)
+				scoreText.text = $"Score: {session.Score}";
+
+			if (bestScoreText != null)
+				bestScoreText.text = $"Best: {session.BestScore}";
+
+			if (newBestIndicator != null)
+				newBestIndicator.SetActive(isNewBest);
 		}
 
-		// UI Button hook
+		// -------- UI Button Callbacks --------
+
 		public void OnRestartClicked()
 		{
 			Debug.Log("[UI] Restart clicked");
-			GameManager.Instance.RestartRun();  // reset only
-			//GameManager.Instance.StartGame();   // gameplay'e dön
+			UIManager.Instance?.OnRestartClicked();
 		}
 
 		public void OnMenuClicked()
 		{
 			Debug.Log("[UI] Menu clicked");
-			GameManager.Instance.OpenMenu();    // menu'ye dön
+			UIManager.Instance?.OnMainMenuClicked();
 		}
-
 	}
 }
