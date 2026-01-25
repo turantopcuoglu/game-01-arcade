@@ -5,6 +5,9 @@ namespace Project.Gameplay
 {
 	public class CoinMover : MonoBehaviour
 	{
+		[Header("Spin Animation")]
+		[SerializeField] private float spinSpeed = 180f;
+
 		private SimplePool _pool;
 		private float _speed;
 		private float _despawnZ;
@@ -18,7 +21,11 @@ namespace Project.Gameplay
 
 		private void Update()
 		{
+			// Move backward
 			transform.position += Vector3.back * _speed * Time.deltaTime;
+
+			// Spin animation
+			transform.Rotate(Vector3.up, spinSpeed * Time.deltaTime, Space.World);
 
 			if (transform.position.z <= _despawnZ)
 			{

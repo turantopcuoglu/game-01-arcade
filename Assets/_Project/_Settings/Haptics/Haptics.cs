@@ -7,9 +7,17 @@ namespace Project.Systems.Haptics
 	public static class Haptics
 	{
 		public static bool Enabled = true;
-		private const int CLICK_DURATION_MS = 35; // 30–50 arasý ayarlanýr
+		private const int CLICK_DURATION_MS = 35;
+		private const int COIN_DURATION_MS = 20;
+		private const int IMPACT_DURATION_MS = 50;
 
-		public static void Click()
+		public static void Click() => Vibrate(CLICK_DURATION_MS);
+
+		public static void CoinPickup() => Vibrate(COIN_DURATION_MS);
+
+		public static void Impact() => Vibrate(IMPACT_DURATION_MS);
+
+		private static void Vibrate(int durationMs)
 		{
 			if (!SettingsData.Vibration) return;
 
@@ -28,14 +36,14 @@ namespace Project.Systems.Haptics
                     using var vibrationEffectClass = new AndroidJavaClass("android.os.VibrationEffect");
                     var effect = vibrationEffectClass.CallStatic<AndroidJavaObject>(
                         "createOneShot",
-                        CLICK_DURATION_MS,
+                        durationMs,
                         vibrationEffectClass.GetStatic<int>("DEFAULT_AMPLITUDE")
                     );
                     vibrator.Call("vibrate", effect);
                 }
                 else
                 {
-                    vibrator.Call("vibrate", CLICK_DURATION_MS);
+                    vibrator.Call("vibrate", durationMs);
                 }
             }
             catch { }
