@@ -1,18 +1,43 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class FinishLine : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+	[Header("Titan Settings")]
+	[SerializeField] private Transform titanTarget;
+	[SerializeField] private float scrapLaunchSpeed = 20f;
+	[SerializeField] private float launchInterval = 0.05f;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+	private bool _triggered;
+
+	private void OnTriggerEnter(Collider other)
+	{
+		if (_triggered) return;
+
+		var player = other.GetComponent<PlayerController>();
+		if (player == null) return;
+
+		var vortex = other.GetComponentInChildren<VortexManager>();
+		if (vortex == null) vortex = other.GetComponent<VortexManager>();
+		if (vortex == null) return;
+
+		_triggered = true;
+		GameManagerTT.Instance.UpdateState(GameState.Win);
+
+		if (titanTarget != null)
+			StartCoroutine(LaunchScrapsToTitan(vortex));
+	}
+
+	private IEnumerator LaunchScrapsToTitan(VortexManager vortex)
+	{
+		var scraps = vortex.ReleaseAll();
+		var wait = new WaitForSeconds(launchInterval);
+
+		foreach (var scrap in scraps)
+		{
+			if (scrap == null) continue;
+			scrap.LaunchToward(titanTarget.position, scrapLaunchSpeed);
+			yield return wait;
+		}
+	}
 }
