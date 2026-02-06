@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManagerTT : MonoBehaviour
@@ -10,6 +8,22 @@ public class GameManagerTT : MonoBehaviour
 	public GameState CurrentState { get; private set; }
 
 	public event Action<GameState> OnStateChanged;
+
+	private int _scrapCount;
+	public int ScrapCount
+	{
+		get => _scrapCount;
+		private set
+		{
+			_scrapCount = Mathf.Max(0, value);
+			OnScrapCountChanged?.Invoke(_scrapCount);
+		}
+	}
+
+	public event Action<int> OnScrapCountChanged;
+
+	private int _currentLevel;
+	public int CurrentLevel => _currentLevel;
 
 	private void Awake()
 	{
@@ -23,47 +37,47 @@ public class GameManagerTT : MonoBehaviour
 
 	private void Start()
 	{
+		_currentLevel = PlayerPrefs.GetInt("CurrentLevel", 1);
 		UpdateState(GameState.Menu);
 	}
 
 	public void UpdateState(GameState newState)
 	{
-		CurrentState = newState;
-		Debug.Log($"State changed to: {CurrentState}");
+		if (CurrentState == newState) return;
 
-		switch(newState)
+		CurrentState = newState;
+		Debug.Log($"[GameManager] State -> {CurrentState}");
+
+		switch (newState)
 		{
 			case GameState.Boot:
-				// Initialize game resources
 				break;
 			case GameState.Menu:
 				HandleMenu();
 				break;
 			case GameState.Gameplay:
-				// Start gameplay
 				HandleGameplay();
 				break;
+			case GameState.Grinding:
+				HandleGrinding();
+				break;
 			case GameState.Pause:
-				// Pause the game
 				HandlePause();
 				break;
-			case GameState.GameOver:
-				// Handle game over logic
-				HandleGameover();
+			case GameState.Win:
+				HandleWin();
+				break;
+			case GameState.Fail:
+				HandleFail();
 				break;
 		}
 
 		OnStateChanged?.Invoke(newState);
 	}
 
-	private void HandleGameover()
+	private void HandleMenu()
 	{
-		Time.timeScale = 0f;
-	}
-
-	private void HandlePause()
-	{
-		Time.timeScale = 0f;
+		Time.timeScale = 1f;
 	}
 
 	private void HandleGameplay()
@@ -71,9 +85,44 @@ public class GameManagerTT : MonoBehaviour
 		Time.timeScale = 1f;
 	}
 
-	private void HandleMenu()
+	private void HandleGrinding()
 	{
-		Time.timeScale = 1f;
+		// Speed reduction handled by PlayerController
+	}
+
+	private void HandlePause()
+	{
+		Time.timeScale = 0f;
+	}
+
+	private void HandleWin()
+	{
+		_currentLevel++;
+		PlayerPrefs.SetInt("CurrentLevel", _currentLevel);
+		PlayerPrefs.Save();
+	}
+
+	private void HandleFail()
+	{
+	}
+
+	// --- Scrap API (called by VortexManager) ---
+
+	public void InitScrapCount(int count)
+	{
+		ScrapCount = count;
+	}
+
+	public void AddScrap(int amount = 1)
+	{
+		ScrapCount += amount;
+	}
+
+	public bool TryConsumeScrap(int amount = 1)
+	{
+		if (ScrapCount < amount) return false;
+		ScrapCount -= amount;
+		return true;
 	}
 }
 
@@ -82,6 +131,8 @@ public enum GameState
 	Boot,
 	Menu,
 	Gameplay,
+	Grinding,
 	Pause,
-	GameOver
+	Win,
+	Fail
 }

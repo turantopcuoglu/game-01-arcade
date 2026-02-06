@@ -1,78 +1,116 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class UIManagerTT : MonoBehaviour
 {
+	[Header("Panels")]
 	[SerializeField] private Transform bootScreen;
 	[SerializeField] private Transform menuPanel;
 	[SerializeField] private Transform hudPanel;
 	[SerializeField] private Transform pausePanel;
-	[SerializeField] private Transform settingsPanel;
-	[SerializeField] private Transform gameOverPanel;
+	[SerializeField] private Transform winPanel;
+	[SerializeField] private Transform failPanel;
 
-	private Transform[] UIPanels;
+	[Header("HUD Elements")]
+	[SerializeField] private TMP_Text scrapCountText;
+	[SerializeField] private TMP_Text levelText;
+
+	private Transform[] _allPanels;
 
 	private void Awake()
 	{
-		UIPanels = new Transform[]
+		_allPanels = new Transform[]
 		{
 			bootScreen,
 			menuPanel,
 			hudPanel,
 			pausePanel,
-			gameOverPanel
+			winPanel,
+			failPanel
 		};
 
 		GameManagerTT.Instance.OnStateChanged += OnGameStateChanged;
+		GameManagerTT.Instance.OnScrapCountChanged += OnScrapCountChanged;
 	}
+
 	private void Start()
 	{
-		
+		if (levelText != null)
+			levelText.text = $"Level {GameManagerTT.Instance.CurrentLevel}";
 	}
+
 	private void OnDestroy()
 	{
+		if (GameManagerTT.Instance == null) return;
 		GameManagerTT.Instance.OnStateChanged -= OnGameStateChanged;
+		GameManagerTT.Instance.OnScrapCountChanged -= OnScrapCountChanged;
 	}
 
 	private void OnGameStateChanged(GameState state)
 	{
-		// Disable all UI panels
-		foreach (Transform panel in UIPanels)
+		foreach (Transform panel in _allPanels)
 		{
-			panel.gameObject.SetActive(false);
+			if (panel != null)
+				panel.gameObject.SetActive(false);
 		}
 
-		// Enable the relevant UI panel based on the game state
 		switch (state)
 		{
 			case GameState.Boot:
-				// Show boot screen
-				bootScreen.gameObject.SetActive(true);
+				SetPanel(bootScreen);
 				break;
 			case GameState.Menu:
-				// Show menu UI
-				menuPanel.gameObject.SetActive(true);
+				SetPanel(menuPanel);
 				break;
 			case GameState.Gameplay:
-				// Hide menu UI, show gameplay HUD
-				hudPanel.gameObject.SetActive(true);
+			case GameState.Grinding:
+				SetPanel(hudPanel);
 				break;
 			case GameState.Pause:
-				// Show pause menu
-				pausePanel.gameObject.SetActive(true);
+				SetPanel(pausePanel);
 				break;
-			case GameState.GameOver:
-				// Show game over screen
-				gameOverPanel.gameObject.SetActive(true);
+			case GameState.Win:
+				SetPanel(winPanel);
+				break;
+			case GameState.Fail:
+				SetPanel(failPanel);
 				break;
 		}
 	}
 
+	private void SetPanel(Transform panel)
+	{
+		if (panel != null)
+			panel.gameObject.SetActive(true);
+	}
+
+	private void OnScrapCountChanged(int count)
+	{
+		if (scrapCountText != null)
+			scrapCountText.text = count.ToString();
+	}
+
+	// --- Button Callbacks ---
+
 	public void OnPlayButtonPressed()
 	{
-		Debug.Log("Play button pressed");
 		GameManagerTT.Instance.UpdateState(GameState.Gameplay);
+	}
+
+	public void OnResumeButtonPressed()
+	{
+		GameManagerTT.Instance.UpdateState(GameState.Gameplay);
+	}
+
+	public void OnRetryButtonPressed()
+	{
+		UnityEngine.SceneManagement.SceneManager.LoadScene(
+			UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+	}
+
+	public void OnNextLevelButtonPressed()
+	{
+		UnityEngine.SceneManagement.SceneManager.LoadScene(
+			UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
 	}
 }
