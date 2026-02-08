@@ -9,20 +9,27 @@ public class PlayerController : MonoBehaviour
 	[SerializeField] private float speedLerpRate = 8f;
 
 	[Header("Swerve")]
-	[SerializeField] private float swerveSpeed = 0.5f;
+	[SerializeField] private float swerveMultiplier = 6f;
 	[SerializeField] private float maxSwerveX = 3f;
+	[SerializeField] private float swerveSmoothRate = 12f;
 
 	private float _currentSpeed;
 	private float _targetSpeed;
-	private float _swerveInput;
 	private bool _isMoving;
+
+	// Swerve tracking
+	private bool _isDragging;
+	private float _lastPointerX;
+	private float _swerveVelocity;
 
 	public float CurrentSpeed => _currentSpeed;
 
 	private void OnEnable()
 	{
 		GameManagerTT.Instance.OnStateChanged += OnStateChanged;
-		InputRouter.Instance.OnDragDelta += OnDrag;
+		InputRouter.Instance.OnTapScreen += OnFingerDown;
+		InputRouter.Instance.OnPointerScreen += OnPointerMove;
+		InputRouter.Instance.OnFingerUp += OnFingerUp;
 	}
 
 	private void OnDisable()
@@ -30,7 +37,11 @@ public class PlayerController : MonoBehaviour
 		if (GameManagerTT.Instance != null)
 			GameManagerTT.Instance.OnStateChanged -= OnStateChanged;
 		if (InputRouter.Instance != null)
-			InputRouter.Instance.OnDragDelta -= OnDrag;
+		{
+			InputRouter.Instance.OnTapScreen -= OnFingerDown;
+			InputRouter.Instance.OnPointerScreen -= OnPointerMove;
+			InputRouter.Instance.OnFingerUp -= OnFingerUp;
+		}
 	}
 
 	private void OnStateChanged(GameState state)
@@ -50,33 +61,52 @@ public class PlayerController : MonoBehaviour
 			case GameState.Pause:
 			case GameState.Menu:
 				_isMoving = false;
+				_isDragging = false;
 				break;
 		}
 	}
 
-	private void OnDrag(Vector2 delta)
+	private void OnFingerDown(Vector2 screenPos)
 	{
 		if (!_isMoving) return;
-		_swerveInput = delta.x * swerveSpeed;
+		_isDragging = true;
+		_lastPointerX = screenPos.x;
+	}
+
+	private void OnPointerMove(Vector2 screenPos)
+	{
+		if (!_isDragging || !_isMoving) return;
+
+		float deltaX = screenPos.x - _lastPointerX;
+		_lastPointerX = screenPos.x;
+
+		// Normalize by screen width so swerve feels consistent across resolutions
+		_swerveVelocity = (deltaX / Screen.width) * swerveMultiplier;
+	}
+
+	private void OnFingerUp()
+	{
+		_isDragging = false;
+		_swerveVelocity = 0f;
 	}
 
 	private void Update()
 	{
 		if (!_isMoving) return;
 
+		// Forward speed lerp
 		_currentSpeed = Mathf.Lerp(_currentSpeed, _targetSpeed, Time.deltaTime * speedLerpRate);
 
-		// Forward movement (Z axis)
 		Vector3 pos = transform.position;
+
+		// Forward movement (Z axis)
 		pos.z += _currentSpeed * Time.deltaTime;
 
-		// Swerve (X axis)
-		pos.x += _swerveInput * Time.deltaTime;
+		// Swerve (X axis) - direct position offset, smoothed
+		pos.x += _swerveVelocity;
 		pos.x = Mathf.Clamp(pos.x, -maxSwerveX, maxSwerveX);
 
 		transform.position = pos;
-
-		_swerveInput = 0f;
 	}
 
 	public void SetGrinding(bool grinding)
