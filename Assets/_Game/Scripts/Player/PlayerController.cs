@@ -63,7 +63,7 @@ public class PlayerController : MonoBehaviour
 	private void Update()
 	{
 		if (!_isMoving) return;
-
+		Debug.Log($"Moving");
 		_currentSpeed = Mathf.Lerp(_currentSpeed, _targetSpeed, Time.deltaTime * speedLerpRate);
 
 		// Forward movement (Z axis)
