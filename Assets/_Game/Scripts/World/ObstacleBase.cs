@@ -14,6 +14,7 @@ public class ObstacleBase : MonoBehaviour
 	[Header("Break Effect")]
 	[SerializeField] private float explosionForce = 300f;
 	[SerializeField] private float explosionRadius = 3f;
+	[SerializeField] private GameObject piecesRoot;
 
 	private int _currentHP;
 	private bool _isGrinding;
@@ -116,6 +117,8 @@ public class ObstacleBase : MonoBehaviour
 
 		AudioService.Instance?.PlayCollision();
 
+		piecesRoot.SetActive(true);
+
 		// Scatter child rigidbodies with explosion force
 		var children = GetComponentsInChildren<Rigidbody>();
 		foreach (var rb in children)
@@ -133,6 +136,9 @@ public class ObstacleBase : MonoBehaviour
 		// Disable collider so player passes through
 		var col = GetComponent<Collider>();
 		if (col != null) col.enabled = false;
+
+		var meshRenderers = GetComponent<MeshRenderer>();
+		if (meshRenderers != null) meshRenderers.enabled = false;
 
 		Destroy(gameObject, 2f);
 	}

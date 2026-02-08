@@ -93,8 +93,7 @@ public class PlayerController : MonoBehaviour
 	private void Update()
 	{
 		if (!_isMoving) return;
-
-		// Forward speed lerp
+    
 		_currentSpeed = Mathf.Lerp(_currentSpeed, _targetSpeed, Time.deltaTime * speedLerpRate);
 
 		Vector3 pos = transform.position;
