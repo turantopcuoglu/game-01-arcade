@@ -15,6 +15,7 @@ namespace Project.Systems.Input
 		public event Action<Vector2> OnTapScreen;
 		public event Action<Vector2> OnPointerScreen;
 		public event Action<Vector2> OnDragDelta;
+		public event Action OnFingerUp;
 
 		public event Action OnTwoFingerTap;
 
@@ -35,6 +36,7 @@ namespace Project.Systems.Input
 			_actions.Enable();
 
 			_actions.Player.Tap.performed += HandleTap;
+			_actions.Player.Tap.canceled += HandleFingerUp;
 			_actions.Player.Point.performed += HandlePoint;
 			_actions.Player.Drag.performed += HandleDrag;
 		}
@@ -43,23 +45,23 @@ namespace Project.Systems.Input
 		private void Update()
 		{
 #if UNITY_EDITOR
-			// Editor hýzlý test: ESC = pause
+			// Editor hï¿½zlï¿½ test: ESC = pause
 			if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
 				OnTwoFingerTap?.Invoke();
 #endif
 
 #if UNITY_ANDROID || UNITY_IOS
-			// Touchscreen yoksa çýk
+			// Touchscreen yoksa ï¿½ï¿½k
 			if (Touchscreen.current == null) return;
 
-			// cooldown (ayný frame spam önlemek için)
+			// cooldown (aynï¿½ frame spam ï¿½nlemek iï¿½in)
 			if (_twoFingerCooldown > 0f)
 			{
 				_twoFingerCooldown -= Time.unscaledDeltaTime;
 				return;
 			}
 
-			// iki parmak dokunuþ kontrolü
+			// iki parmak dokunuï¿½ kontrolï¿½
 			var touches = Touchscreen.current.touches;
 			int pressedCount = 0;
 
@@ -80,8 +82,12 @@ namespace Project.Systems.Input
 		private void HandleTap(InputAction.CallbackContext ctx)
 		{
 			var pos = _actions.Player.Point.ReadValue<Vector2>();
-			//Debug.Log($"[InputRouter] Tap performed. pos={pos}");
 			OnTapScreen?.Invoke(pos);
+		}
+
+		private void HandleFingerUp(InputAction.CallbackContext ctx)
+		{
+			OnFingerUp?.Invoke();
 		}
 
 
