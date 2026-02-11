@@ -2,6 +2,14 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Manages the scrap vortex orbiting around the player.
+/// Handles orbit math (Sin/Cos layered rings), scrap add/remove,
+/// gate operations with visual spawning, and release-all for Titan.
+///
+/// File is named StackManager.cs for historical reasons.
+/// Class name is VortexManager — rename file in Unity if desired.
+/// </summary>
 public class VortexManager : MonoBehaviour
 {
 	[Header("Orbit Settings")]
@@ -10,6 +18,9 @@ public class VortexManager : MonoBehaviour
 	[SerializeField] private float orbitSpeed = 180f;
 	[SerializeField] private float orbitHeight = 0.5f;
 	[SerializeField] private int scrapsPerLayer = 8;
+
+	[Header("Spawning (for Gate + operations)")]
+	[SerializeField] private GameObject scrapPrefab;
 
 	private readonly List<ScrapItem> _scraps = new List<ScrapItem>();
 	private float _orbitAngle;
@@ -50,12 +61,15 @@ public class VortexManager : MonoBehaviour
 		}
 	}
 
+	// ── Add / Remove ───────────────────────────────────
+
 	public void AddScrap(ScrapItem scrap)
 	{
 		_scraps.Add(scrap);
 		scrap.EnterOrbit(transform);
 
 		GameManagerTT.Instance.AddScrap();
+		GameEvents.ScrapCollected(scrap);
 	}
 
 	public ScrapItem RemoveScrap()
@@ -71,6 +85,8 @@ public class VortexManager : MonoBehaviour
 
 		return scrap;
 	}
+
+	// ── Gate Operations ────────────────────────────────
 
 	public void ApplyGateOperation(GateOperation op, int value)
 	{
@@ -99,9 +115,7 @@ public class VortexManager : MonoBehaviour
 
 		if (diff > 0)
 		{
-			// Spawn extra scraps - requires a prefab reference passed from gate
-			for (int i = 0; i < diff; i++)
-				GameManagerTT.Instance.AddScrap();
+			SpawnScraps(diff);
 		}
 		else if (diff < 0)
 		{
@@ -112,7 +126,38 @@ public class VortexManager : MonoBehaviour
 					Destroy(scrap.gameObject);
 			}
 		}
+
+		GameEvents.GateActivated(op, value);
 	}
+
+	/// <summary>
+	/// Spawns new scrap instances and adds them to orbit.
+	/// Used by gate + operations to create visual scraps.
+	/// </summary>
+	private void SpawnScraps(int count)
+	{
+		if (scrapPrefab == null)
+		{
+			// Fallback: just update the count without visual scraps
+			for (int i = 0; i < count; i++)
+				GameManagerTT.Instance.AddScrap();
+			return;
+		}
+
+		for (int i = 0; i < count; i++)
+		{
+			Vector3 spawnPos = transform.position + Vector3.up * 0.5f;
+			GameObject obj = Instantiate(scrapPrefab, spawnPos, Quaternion.identity);
+			ScrapItem scrap = obj.GetComponent<ScrapItem>();
+
+			if (scrap != null)
+			{
+				AddScrap(scrap);
+			}
+		}
+	}
+
+	// ── Release All (for Titan launch) ─────────────────
 
 	public List<ScrapItem> ReleaseAll()
 	{
@@ -120,12 +165,4 @@ public class VortexManager : MonoBehaviour
 		_scraps.Clear();
 		return released;
 	}
-}
-
-public enum GateOperation
-{
-	Add,
-	Subtract,
-	Multiply,
-	Divide
 }

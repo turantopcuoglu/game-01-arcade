@@ -1,8 +1,15 @@
 using UnityEngine;
-using Project.Audio;
-using Project.Systems.Haptics;
 
-public class ObstacleBase : MonoBehaviour
+/// <summary>
+/// Grindable obstacle — implements IDamageable.
+/// When the player collides, grinding starts: scraps are consumed from the
+/// vortex each tick, dealing 1 damage. At HP=0 the obstacle breaks apart.
+///
+/// Feedback (audio, haptics, camera shake) is NOT handled here.
+/// ObstacleBase fires GameEvents, and FeedbackManager responds.
+/// This keeps the class focused on gameplay logic only.
+/// </summary>
+public class ObstacleBase : MonoBehaviour, IDamageable
 {
 	[Header("Stats")]
 	[SerializeField] private int maxHP = 2;
@@ -22,6 +29,11 @@ public class ObstacleBase : MonoBehaviour
 	private VortexManager _grindingVortex;
 	private PlayerController _grindingPlayer;
 
+	// ── IDamageable ────────────────────────────────────
+	public int CurrentHP => _currentHP;
+	public int MaxHP => maxHP;
+	public bool IsAlive => _currentHP > 0;
+
 	private void Awake()
 	{
 		_currentHP = maxHP;
@@ -38,6 +50,8 @@ public class ObstacleBase : MonoBehaviour
 			GrindTick();
 		}
 	}
+
+	// ── Collision ──────────────────────────────────────
 
 	private void OnCollisionEnter(Collision collision)
 	{
@@ -61,6 +75,8 @@ public class ObstacleBase : MonoBehaviour
 		}
 	}
 
+	// ── Grinding ───────────────────────────────────────
+
 	private void StartGrinding(PlayerController player, VortexManager vortex)
 	{
 		_isGrinding = true;
@@ -69,10 +85,13 @@ public class ObstacleBase : MonoBehaviour
 		_grindingPlayer = player;
 
 		player.SetGrinding(true);
+		GameEvents.GrindStarted();
 	}
 
 	private void StopGrinding()
 	{
+		if (!_isGrinding) return;
+
 		_isGrinding = false;
 		_grindingVortex = null;
 
@@ -81,6 +100,8 @@ public class ObstacleBase : MonoBehaviour
 			_grindingPlayer.SetGrinding(false);
 			_grindingPlayer = null;
 		}
+
+		GameEvents.GrindStopped();
 	}
 
 	private void GrindTick()
@@ -98,12 +119,15 @@ public class ObstacleBase : MonoBehaviour
 			Destroy(consumed.gameObject);
 
 		TakeDamage(1);
-		Haptics.Impact();
+		GameEvents.GrindTick();
 	}
+
+	// ── IDamageable ────────────────────────────────────
 
 	public void TakeDamage(int damage)
 	{
 		_currentHP -= damage;
+		GameEvents.DamageTaken(this, _currentHP);
 
 		if (_currentHP <= 0)
 		{
@@ -111,13 +135,17 @@ public class ObstacleBase : MonoBehaviour
 		}
 	}
 
+	// ── Break ──────────────────────────────────────────
+
 	private void Break()
 	{
 		StopGrinding();
 
-		AudioService.Instance?.PlayCollision();
+		// Notify via event bus (FeedbackManager handles audio/haptics/camera)
+		GameEvents.ObstacleDestroyed(this);
 
-		piecesRoot.SetActive(true);
+		if (piecesRoot != null)
+			piecesRoot.SetActive(true);
 
 		// Scatter child rigidbodies with explosion force
 		var children = GetComponentsInChildren<Rigidbody>();
@@ -127,18 +155,14 @@ public class ObstacleBase : MonoBehaviour
 			rb.AddExplosionForce(explosionForce, transform.position, explosionRadius);
 		}
 
-		// If no child rigidbodies, just disable
 		if (children.Length == 0)
-		{
 			gameObject.SetActive(false);
-		}
 
-		// Disable collider so player passes through
 		var col = GetComponent<Collider>();
 		if (col != null) col.enabled = false;
 
-		var meshRenderers = GetComponent<MeshRenderer>();
-		if (meshRenderers != null) meshRenderers.enabled = false;
+		var mesh = GetComponent<MeshRenderer>();
+		if (mesh != null) mesh.enabled = false;
 
 		Destroy(gameObject, 2f);
 	}
