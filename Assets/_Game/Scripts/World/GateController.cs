@@ -1,6 +1,16 @@
 using UnityEngine;
 using TMPro;
 
+/// <summary>
+/// Interactive gate that modifies the player's scrap count.
+/// Two gates are placed side by side — player chooses one.
+///
+/// Positive gates (Add, Multiply) = green.
+/// Negative gates (Subtract, Divide) = red.
+///
+/// Event firing moved to VortexManager.ApplyGateOperation()
+/// so GateController stays focused on trigger detection + visuals.
+/// </summary>
 public class GateController : MonoBehaviour
 {
 	[Header("Gate Settings")]
@@ -49,11 +59,13 @@ public class GateController : MonoBehaviour
 	{
 		if (_used) return;
 
-		var vortex = other.GetComponent<VortexManager>();
-		if (vortex == null) vortex = other.GetComponentInChildren<VortexManager>();
+		var vortex = other.GetComponent<StackManager>();
+		if (vortex == null) vortex = other.GetComponentInChildren<StackManager>();
 		if (vortex == null) return;
 
 		_used = true;
+
+		// ApplyGateOperation handles both logic and event firing
 		vortex.ApplyGateOperation(operation, value);
 
 		gameObject.SetActive(false);

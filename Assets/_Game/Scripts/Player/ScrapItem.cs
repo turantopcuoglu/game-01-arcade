@@ -10,13 +10,13 @@ public class ScrapItem : MonoBehaviour, ICollectable
 	private State _state = State.Idle;
 	private Transform _orbitCenter;
 	private Vector3 _orbitTarget;
-	private VortexManager _targetVortex;
+	private StackManager _targetVortex;
 
 	public void Collect(Transform collector)
 	{
-		_targetVortex = collector.GetComponent<VortexManager>();
+		_targetVortex = collector.GetComponent<StackManager>();
 		if (_targetVortex == null)
-			_targetVortex = collector.GetComponentInChildren<VortexManager>();
+			_targetVortex = collector.GetComponentInChildren<StackManager>();
 
 		if (_targetVortex == null) return;
 
