@@ -41,6 +41,7 @@ public class TitanController : MonoBehaviour
 
 	private void ReceiveScrap()
 	{
+		Debug.Log("Titan received scrap! Progress: " + Progress);
 		_receivedCount++;
 
 		// Enable body parts progressively

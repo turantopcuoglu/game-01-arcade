@@ -15,7 +15,7 @@ MonoBehaviour:
   levelIndex: 1
   displayName: Lv1
   levelPrefab: {fileID: 7775591783345958657, guid: 75f7da9115aeb7f43b37d4a8a6307a41, type: 3}
-  titanCapacity: 30
+  titanCapacity: 10
   baseCoinReward: 100
   multiplierZones:
   - 1
