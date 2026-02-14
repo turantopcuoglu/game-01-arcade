@@ -1,6 +1,16 @@
 using UnityEngine;
 using Project.Systems.Input;
 
+/// <summary>
+/// Handles forward movement (auto-run) and lateral swerve (touch drag).
+///
+/// Swerve uses a TARGET-BASED system:
+///   1. Finger drag sets _targetSwerveX (accumulated delta, clamped)
+///   2. Update() smoothly interpolates pos.x toward _targetSwerveX via Lerp
+///   3. On finger up, character stays at current lane (smooth deceleration)
+///
+/// This is frame-rate independent and feels responsive on all devices.
+/// </summary>
 public class PlayerController : MonoBehaviour
 {
 	[Header("Forward Movement")]
@@ -9,9 +19,10 @@ public class PlayerController : MonoBehaviour
 	[SerializeField] private float speedLerpRate = 8f;
 
 	[Header("Swerve")]
-	[SerializeField] private float swerveMultiplier = 6f;
-	[SerializeField] private float maxSwerveX = 3f;
-	[SerializeField] private float swerveSmoothRate = 12f;
+	[Tooltip("World units per full-screen drag. Match to road width for intuitive feel.")]
+	[SerializeField] private float swerveSensitivity = 7f;
+	[SerializeField] private float maxSwerveX = 3.5f;
+	[SerializeField] private float swerveLerpSpeed = 12f;
 
 	private float _currentSpeed;
 	private float _targetSpeed;
@@ -20,7 +31,7 @@ public class PlayerController : MonoBehaviour
 	// Swerve tracking
 	private bool _isDragging;
 	private float _lastPointerX;
-	private float _swerveVelocity;
+	private float _targetSwerveX;
 
 	public float CurrentSpeed => _currentSpeed;
 
@@ -71,6 +82,7 @@ public class PlayerController : MonoBehaviour
 		if (!_isMoving) return;
 		_isDragging = true;
 		_lastPointerX = screenPos.x;
+		_targetSwerveX = transform.position.x;
 	}
 
 	private void OnPointerMove(Vector2 screenPos)
@@ -80,20 +92,20 @@ public class PlayerController : MonoBehaviour
 		float deltaX = screenPos.x - _lastPointerX;
 		_lastPointerX = screenPos.x;
 
-		// Normalize by screen width so swerve feels consistent across resolutions
-		_swerveVelocity = (deltaX / Screen.width) * swerveMultiplier;
+		_targetSwerveX += (deltaX / Screen.width) * swerveSensitivity;
+		_targetSwerveX = Mathf.Clamp(_targetSwerveX, -maxSwerveX, maxSwerveX);
 	}
 
 	private void OnFingerUp()
 	{
 		_isDragging = false;
-		_swerveVelocity = 0f;
 	}
 
 	private void Update()
 	{
 		if (!_isMoving) return;
-    
+
+		// Forward speed (smooth transition between normal and grind)
 		_currentSpeed = Mathf.Lerp(_currentSpeed, _targetSpeed, Time.deltaTime * speedLerpRate);
 
 		Vector3 pos = transform.position;
@@ -101,9 +113,8 @@ public class PlayerController : MonoBehaviour
 		// Forward movement (Z axis)
 		pos.z += _currentSpeed * Time.deltaTime;
 
-		// Swerve (X axis) - direct position offset, smoothed
-		pos.x += _swerveVelocity;
-		pos.x = Mathf.Clamp(pos.x, -maxSwerveX, maxSwerveX);
+		// Swerve (X axis) — smooth interpolation toward target
+		pos.x = Mathf.Lerp(pos.x, _targetSwerveX, Time.deltaTime * swerveLerpSpeed);
 
 		transform.position = pos;
 	}
