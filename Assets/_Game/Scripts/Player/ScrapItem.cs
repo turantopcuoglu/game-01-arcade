@@ -79,6 +79,11 @@ public class ScrapItem : MonoBehaviour, ICollectable
 		var rb = GetComponent<Rigidbody>();
 		if (rb == null) rb = gameObject.AddComponent<Rigidbody>();
 
+		gameObject.layer = LayerMask.NameToLayer("IgnorePlayer");
+
+		var col = GetComponent<Collider>();
+		if (col != null) col.enabled = true;
+
 		rb.isKinematic = false;
 		rb.useGravity = false;
 		Vector3 dir = (target - transform.position).normalized;

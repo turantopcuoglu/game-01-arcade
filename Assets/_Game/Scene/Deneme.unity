@@ -691,7 +691,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 962789618}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!20 &962789620
 Camera:
   m_ObjectHideFlags: 0
@@ -1276,9 +1276,17 @@ PrefabInstance:
       propertyPath: scrapPrefab
       value: 
       objectReference: {fileID: 9065002810563566029, guid: 706277abec5e16f4e9fafd61822e65a4, type: 3}
+    - target: {fileID: 677179358933795232, guid: 5ac718f787aa06f4b995019c713ea87b, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 4009890684231831278, guid: 5ac718f787aa06f4b995019c713ea87b, type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 4009890684231831278, guid: 5ac718f787aa06f4b995019c713ea87b, type: 3}
+      propertyPath: m_Layer
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 5949350046232503479, guid: 5ac718f787aa06f4b995019c713ea87b, type: 3}
       propertyPath: m_Constraints
@@ -1323,6 +1331,10 @@ PrefabInstance:
     - target: {fileID: 7651964429672147783, guid: 5ac718f787aa06f4b995019c713ea87b, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9138897309498863717, guid: 5ac718f787aa06f4b995019c713ea87b, type: 3}
+      propertyPath: maxSwerveX
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1375,10 +1387,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5139890590902862758, guid: 75f7da9115aeb7f43b37d4a8a6307a41, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6897425826857394012, guid: 75f7da9115aeb7f43b37d4a8a6307a41, type: 3}
-      propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7543380117437052774, guid: 75f7da9115aeb7f43b37d4a8a6307a41, type: 3}
