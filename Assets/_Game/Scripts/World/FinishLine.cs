@@ -17,8 +17,8 @@ public class FinishLine : MonoBehaviour
 		var player = other.GetComponent<PlayerController>();
 		if (player == null) return;
 
-		var vortex = other.GetComponentInChildren<VortexManager>();
-		if (vortex == null) vortex = other.GetComponent<VortexManager>();
+		var vortex = other.GetComponentInChildren<StackManager>();
+		if (vortex == null) vortex = other.GetComponent<StackManager>();
 		if (vortex == null) return;
 
 		_triggered = true;
@@ -28,7 +28,7 @@ public class FinishLine : MonoBehaviour
 			StartCoroutine(LaunchScrapsToTitan(vortex));
 	}
 
-	private IEnumerator LaunchScrapsToTitan(VortexManager vortex)
+	private IEnumerator LaunchScrapsToTitan(StackManager vortex)
 	{
 		var scraps = vortex.ReleaseAll();
 		var wait = new WaitForSeconds(launchInterval);

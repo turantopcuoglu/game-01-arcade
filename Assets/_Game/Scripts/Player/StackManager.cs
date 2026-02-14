@@ -10,7 +10,7 @@ using UnityEngine;
 /// File is named StackManager.cs for historical reasons.
 /// Class name is VortexManager — rename file in Unity if desired.
 /// </summary>
-public class VortexManager : MonoBehaviour
+public class StackManager : MonoBehaviour
 {
 	[Header("Orbit Settings")]
 	[SerializeField] private float baseOrbitRadius = 1.5f;

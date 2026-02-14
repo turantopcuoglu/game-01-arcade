@@ -28,8 +28,8 @@ public class HardObstacle : MonoBehaviour
 
 	private void OnTriggerEnter(Collider other)
 	{
-		var vortex = other.GetComponent<VortexManager>();
-		if (vortex == null) vortex = other.GetComponentInChildren<VortexManager>();
+		var vortex = other.GetComponent<StackManager>();
+		if (vortex == null) vortex = other.GetComponentInChildren<StackManager>();
 		if (vortex == null) return;
 
 		// Destroy scraps on contact

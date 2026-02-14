@@ -26,7 +26,7 @@ public class ObstacleBase : MonoBehaviour, IDamageable
 	private int _currentHP;
 	private bool _isGrinding;
 	private float _grindTimer;
-	private VortexManager _grindingVortex;
+	private StackManager _grindingVortex;
 	private PlayerController _grindingPlayer;
 
 	// ── IDamageable ────────────────────────────────────
@@ -60,8 +60,8 @@ public class ObstacleBase : MonoBehaviour, IDamageable
 		var player = collision.gameObject.GetComponent<PlayerController>();
 		if (player == null) return;
 
-		var vortex = collision.gameObject.GetComponentInChildren<VortexManager>();
-		if (vortex == null) vortex = collision.gameObject.GetComponent<VortexManager>();
+		var vortex = collision.gameObject.GetComponentInChildren<StackManager>();
+		if (vortex == null) vortex = collision.gameObject.GetComponent<StackManager>();
 		if (vortex == null) return;
 
 		StartGrinding(player, vortex);
@@ -77,7 +77,7 @@ public class ObstacleBase : MonoBehaviour, IDamageable
 
 	// ── Grinding ───────────────────────────────────────
 
-	private void StartGrinding(PlayerController player, VortexManager vortex)
+	private void StartGrinding(PlayerController player, StackManager vortex)
 	{
 		_isGrinding = true;
 		_grindTimer = grindInterval;

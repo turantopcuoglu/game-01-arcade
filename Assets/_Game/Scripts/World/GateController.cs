@@ -59,8 +59,8 @@ public class GateController : MonoBehaviour
 	{
 		if (_used) return;
 
-		var vortex = other.GetComponent<VortexManager>();
-		if (vortex == null) vortex = other.GetComponentInChildren<VortexManager>();
+		var vortex = other.GetComponent<StackManager>();
+		if (vortex == null) vortex = other.GetComponentInChildren<StackManager>();
 		if (vortex == null) return;
 
 		_used = true;
