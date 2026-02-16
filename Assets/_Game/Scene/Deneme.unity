@@ -1334,7 +1334,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9138897309498863717, guid: 5ac718f787aa06f4b995019c713ea87b, type: 3}
       propertyPath: maxSwerveX
-      value: 6
+      value: 12
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
