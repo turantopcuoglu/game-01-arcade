@@ -64,6 +64,9 @@ public class GameManagerTT : MonoBehaviour
 			case GameState.Pause:
 				HandlePause();
 				break;
+			case GameState.TitanCinematic:
+				HandleTitanCinematic();
+				break;
 			case GameState.Win:
 				HandleWin();
 				break;
@@ -93,6 +96,11 @@ public class GameManagerTT : MonoBehaviour
 	private void HandlePause()
 	{
 		Time.timeScale = 0f;
+	}
+
+	private void HandleTitanCinematic()
+	{
+		// Player stops, camera switches to Titan — handled externally
 	}
 
 	private void HandleWin()
@@ -133,6 +141,7 @@ public enum GameState
 	Gameplay,
 	Grinding,
 	Pause,
+	TitanCinematic,
 	Win,
 	Fail
 }

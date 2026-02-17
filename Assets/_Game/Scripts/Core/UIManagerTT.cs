@@ -69,6 +69,9 @@ public class UIManagerTT : MonoBehaviour
 			case GameState.Pause:
 				SetPanel(pausePanel);
 				break;
+			case GameState.TitanCinematic:
+				// No panel — cinematic plays, win panel comes later
+				break;
 			case GameState.Win:
 				SetPanel(winPanel);
 				break;
