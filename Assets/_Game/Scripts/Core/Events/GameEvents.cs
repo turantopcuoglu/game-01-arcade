@@ -30,6 +30,7 @@ public static class GameEvents
 	// ── Titan ──────────────────────────────────────────
 	public static event Action<float> OnTitanProgress;
 	public static event Action OnTitanComplete;
+	public static event Action OnAllScrapsDelivered;
 
 	// ── Level ──────────────────────────────────────────
 	public static event Action<LevelData> OnLevelLoaded;
@@ -64,6 +65,9 @@ public static class GameEvents
 	public static void TitanCompleted()
 		=> OnTitanComplete?.Invoke();
 
+	public static void AllScrapsDelivered()
+		=> OnAllScrapsDelivered?.Invoke();
+
 	public static void LevelLoaded(LevelData data)
 		=> OnLevelLoaded?.Invoke(data);
 
@@ -83,6 +87,7 @@ public static class GameEvents
 		OnHardObstacleHit = null;
 		OnTitanProgress = null;
 		OnTitanComplete = null;
+		OnAllScrapsDelivered = null;
 		OnLevelLoaded = null;
 	}
 }

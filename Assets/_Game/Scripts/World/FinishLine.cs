@@ -1,5 +1,7 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using Cinemachine;
 
 public class FinishLine : MonoBehaviour
 {
@@ -7,6 +9,14 @@ public class FinishLine : MonoBehaviour
 	[SerializeField] private Transform titanTarget;
 	[SerializeField] private float scrapLaunchSpeed = 20f;
 	[SerializeField] private float launchInterval = 0.05f;
+
+	[Header("Cinemachine")]
+	[SerializeField] private CinemachineVirtualCamera titanCam;
+	[SerializeField] private int finishingCamPriority = 20;
+
+	[Header("Win Delay")]
+	[Tooltip("Extra seconds to wait after all scraps are delivered before showing the win panel.")]
+	[SerializeField] private float winPanelDelay = 0.5f;
 
 	private bool _triggered;
 
@@ -22,22 +32,59 @@ public class FinishLine : MonoBehaviour
 		if (vortex == null) return;
 
 		_triggered = true;
-		GameManagerTT.Instance.UpdateState(GameState.Win);
+
+		// Enter Finishing state — player stops, HUD stays, no win panel yet
+		GameManagerTT.Instance.UpdateState(GameState.Finishing);
+
+		// Switch Cinemachine to titan camera
+		if (titanCam != null)
+			titanCam.Priority = finishingCamPriority;
 
 		if (titanTarget != null)
 			StartCoroutine(LaunchScrapsToTitan(vortex));
+		else
+			StartCoroutine(DelayedWin(0f));
 	}
 
 	private IEnumerator LaunchScrapsToTitan(StackManager vortex)
 	{
 		var scraps = vortex.ReleaseAll();
 		var wait = new WaitForSeconds(launchInterval);
+		var launched = new List<ScrapItem>();
 
 		foreach (var scrap in scraps)
 		{
 			if (scrap == null) continue;
 			scrap.LaunchToward(titanTarget.position, scrapLaunchSpeed);
+			launched.Add(scrap);
 			yield return wait;
 		}
+
+		// Wait until all launched scraps have been destroyed (arrived at titan or timed out)
+		if (launched.Count > 0)
+		{
+			yield return new WaitUntil(() => AllScrapsDelivered(launched));
+		}
+
+		GameEvents.AllScrapsDelivered();
+
+		yield return DelayedWin(winPanelDelay);
+	}
+
+	private IEnumerator DelayedWin(float delay)
+	{
+		if (delay > 0f)
+			yield return new WaitForSeconds(delay);
+
+		GameManagerTT.Instance.UpdateState(GameState.Win);
+	}
+
+	private bool AllScrapsDelivered(List<ScrapItem> scraps)
+	{
+		for (int i = 0; i < scraps.Count; i++)
+		{
+			if (scraps[i] != null) return false;
+		}
+		return true;
 	}
 }

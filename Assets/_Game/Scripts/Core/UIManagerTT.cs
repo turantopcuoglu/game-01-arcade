@@ -64,6 +64,7 @@ public class UIManagerTT : MonoBehaviour
 				break;
 			case GameState.Gameplay:
 			case GameState.Grinding:
+			case GameState.Finishing:
 				SetPanel(hudPanel);
 				break;
 			case GameState.Pause:
