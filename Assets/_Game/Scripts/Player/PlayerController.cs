@@ -73,6 +73,7 @@ public class PlayerController : MonoBehaviour
 				_isMoving = true;
 				_targetSpeed = grindSpeed;
 				break;
+			case GameState.Finishing:
 			case GameState.Win:
 			case GameState.Fail:
 			case GameState.Pause:

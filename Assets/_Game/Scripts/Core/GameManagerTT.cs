@@ -64,6 +64,9 @@ public class GameManagerTT : MonoBehaviour
 			case GameState.Pause:
 				HandlePause();
 				break;
+			case GameState.Finishing:
+				HandleFinishing();
+				break;
 			case GameState.Win:
 				HandleWin();
 				break;
@@ -93,6 +96,13 @@ public class GameManagerTT : MonoBehaviour
 	private void HandlePause()
 	{
 		Time.timeScale = 0f;
+	}
+
+	private void HandleFinishing()
+	{
+		// Player reached finish line — scraps flying to titan.
+		// Win panel is NOT shown yet. Transition to Win happens
+		// after all scraps are delivered (triggered by FinishLine).
 	}
 
 	private void HandleWin()
@@ -133,6 +143,7 @@ public enum GameState
 	Gameplay,
 	Grinding,
 	Pause,
+	Finishing,
 	Win,
 	Fail
 }
