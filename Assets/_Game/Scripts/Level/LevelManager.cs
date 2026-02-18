@@ -51,6 +51,11 @@ public class LevelManager : MonoBehaviour
 				Quaternion.identity,
 				levelParent
 			);
+
+			// Auto-resolve external dependencies for prefab components
+			var bindables = _currentLevelInstance.GetComponentsInChildren<IAutoBindable>();
+			foreach (var bindable in bindables)
+				bindable.AutoBind(_currentLevelInstance);
 		}
 
 		OnLevelLoaded?.Invoke(CurrentLevelData);
