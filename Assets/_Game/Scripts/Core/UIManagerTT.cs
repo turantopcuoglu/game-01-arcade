@@ -95,7 +95,17 @@ public class UIManagerTT : MonoBehaviour
 
 	public void OnPlayButtonPressed()
 	{
-		GameManagerTT.Instance.UpdateState(GameState.Gameplay);
+		if (PassingEffect.Instance != null)
+		{
+			PassingEffect.Instance.Play(() =>
+			{
+				GameManagerTT.Instance.UpdateState(GameState.Gameplay);
+			});
+		}
+		else
+		{
+			GameManagerTT.Instance.UpdateState(GameState.Gameplay);
+		}
 	}
 
 	public void OnResumeButtonPressed()
@@ -105,13 +115,27 @@ public class UIManagerTT : MonoBehaviour
 
 	public void OnRetryButtonPressed()
 	{
-		UnityEngine.SceneManagement.SceneManager.LoadScene(
-			UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+		if (PassingEffect.Instance != null)
+		{
+			PassingEffect.Instance.PlayWithSceneReload();
+		}
+		else
+		{
+			UnityEngine.SceneManagement.SceneManager.LoadScene(
+				UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+		}
 	}
 
 	public void OnNextLevelButtonPressed()
 	{
-		UnityEngine.SceneManagement.SceneManager.LoadScene(
-			UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+		if (PassingEffect.Instance != null)
+		{
+			PassingEffect.Instance.PlayWithSceneReload();
+		}
+		else
+		{
+			UnityEngine.SceneManagement.SceneManager.LoadScene(
+				UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+		}
 	}
 }
