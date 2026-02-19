@@ -116,6 +116,23 @@ public class GameManagerTT : MonoBehaviour
 	{
 	}
 
+	// --- Soft Reset (no scene reload) ---
+
+	/// <summary>
+	/// Resets game state for retry / next-level without reloading the scene.
+	/// Call while the screen is covered by PassingEffect.
+	/// </summary>
+	public void SoftReset()
+	{
+		_currentLevel = PlayerPrefs.GetInt("CurrentLevel", 1);
+		ScrapCount = 0;
+
+		// Force state to Boot so UpdateState(Menu) won't be skipped
+		// if we are already in Menu.
+		CurrentState = GameState.Boot;
+		UpdateState(GameState.Menu);
+	}
+
 	// --- Scrap API (called by VortexManager) ---
 
 	public void InitScrapCount(int count)

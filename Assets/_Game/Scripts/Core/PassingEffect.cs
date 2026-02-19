@@ -10,9 +10,8 @@ using UnityEngine;
 ///   2. Callback fires while the screen is fully covered
 ///   3. Reveal — image slides back DOWN to its hidden position (reveals screen)
 ///
-/// Two public APIs:
-///   Play(callback)          — cover → callback → reveal  (for state changes)
-///   PlayWithSceneReload()   — cover → reload scene → auto-reveal in new scene
+/// Public API:
+///   Play(callback)  — cover → callback → reveal  (for state changes & level transitions)
 ///
 /// Setup in Unity:
 ///   - Canvas > PassingEffectRoot > BlackPassingImage
@@ -41,9 +40,6 @@ public class PassingEffect : MonoBehaviour
 	private float _coveredY;
 	private bool _isPlaying;
 
-	// Persists across scene loads via static field
-	private static bool _revealOnStart;
-
 	private void Awake()
 	{
 		if (Instance != null && Instance != this)
@@ -57,19 +53,8 @@ public class PassingEffect : MonoBehaviour
 	private void Start()
 	{
 		CalculatePositions();
-
-		if (_revealOnStart)
-		{
-			_revealOnStart = false;
-			SetY(_coveredY);
-			passingImage.gameObject.SetActive(true);
-			StartCoroutine(RevealRoutine(null));
-		}
-		else
-		{
-			SetY(_hiddenY);
-			passingImage.gameObject.SetActive(false);
-		}
+		SetY(_hiddenY);
+		passingImage.gameObject.SetActive(false);
 	}
 
 	private void CalculatePositions()
@@ -100,15 +85,6 @@ public class PassingEffect : MonoBehaviour
 	}
 
 	/// <summary>
-	/// Cover → reload active scene.  New scene auto-reveals on Start.
-	/// </summary>
-	public void PlayWithSceneReload()
-	{
-		if (_isPlaying) return;
-		StartCoroutine(CoverAndReloadRoutine());
-	}
-
-	/// <summary>
 	/// Returns true while a transition is in progress.
 	/// </summary>
 	public bool IsPlaying => _isPlaying;
@@ -127,19 +103,6 @@ public class PassingEffect : MonoBehaviour
 		yield return new WaitForSecondsRealtime(coveredPause);
 
 		yield return RevealRoutine(() => _isPlaying = false);
-	}
-
-	private IEnumerator CoverAndReloadRoutine()
-	{
-		_isPlaying = true;
-		passingImage.gameObject.SetActive(true);
-
-		yield return CoverRoutine();
-
-		_revealOnStart = true;
-
-		UnityEngine.SceneManagement.SceneManager.LoadScene(
-			UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
 	}
 
 	private IEnumerator CoverRoutine()

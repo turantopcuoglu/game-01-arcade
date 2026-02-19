@@ -116,26 +116,29 @@ public class UIManagerTT : MonoBehaviour
 	public void OnRetryButtonPressed()
 	{
 		if (PassingEffect.Instance != null)
-		{
-			PassingEffect.Instance.PlayWithSceneReload();
-		}
+			PassingEffect.Instance.Play(SoftResetLevel);
 		else
-		{
-			UnityEngine.SceneManagement.SceneManager.LoadScene(
-				UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
-		}
+			SoftResetLevel();
 	}
 
 	public void OnNextLevelButtonPressed()
 	{
 		if (PassingEffect.Instance != null)
-		{
-			PassingEffect.Instance.PlayWithSceneReload();
-		}
+			PassingEffect.Instance.Play(SoftResetLevel);
 		else
-		{
-			UnityEngine.SceneManagement.SceneManager.LoadScene(
-				UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
-		}
+			SoftResetLevel();
+	}
+
+	/// <summary>
+	/// Destroys the current level prefab, re-instantiates it, and resets game state.
+	/// Called by PassingEffect while the screen is fully covered.
+	/// </summary>
+	private void SoftResetLevel()
+	{
+		LevelManager.Instance.ReloadCurrentLevel();
+		GameManagerTT.Instance.SoftReset();
+
+		if (levelText != null)
+			levelText.text = $"Level {GameManagerTT.Instance.CurrentLevel}";
 	}
 }

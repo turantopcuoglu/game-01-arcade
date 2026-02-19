@@ -63,6 +63,16 @@ public class LevelManager : MonoBehaviour
 		GameEvents.LevelLoaded(CurrentLevelData);
 	}
 
+	/// <summary>
+	/// Destroys the current level prefab and re-instantiates it.
+	/// Used by soft reset (retry / next-level) without scene reload.
+	/// </summary>
+	public void ReloadCurrentLevel()
+	{
+		int levelIndex = GameManagerTT.Instance.CurrentLevel - 1;
+		LoadLevel(levelIndex);
+	}
+
 	public void ClearLevel()
 	{
 		if (_currentLevelInstance != null)
