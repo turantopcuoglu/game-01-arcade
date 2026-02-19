@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
 
-public class FinishLine : MonoBehaviour
+public class FinishLine : MonoBehaviour, IAutoBindable
 {
 	[Header("Titan Settings")]
 	[SerializeField] private Transform titanTarget;
@@ -19,6 +19,23 @@ public class FinishLine : MonoBehaviour
 	[SerializeField] private float winPanelDelay = 0.5f;
 
 	private bool _triggered;
+
+	public void AutoBind(GameObject levelRoot)
+	{
+		// Resolve titanCam: search level first, then scene-wide
+		if (titanCam == null)
+			titanCam = levelRoot.GetComponentInChildren<CinemachineVirtualCamera>();
+		if (titanCam == null)
+			titanCam = FindObjectOfType<CinemachineVirtualCamera>();
+
+		// Resolve titanTarget: find TitanController's transform
+		if (titanTarget == null)
+		{
+			var titan = levelRoot.GetComponentInChildren<TitanController>();
+			if (titan == null) titan = FindObjectOfType<TitanController>();
+			if (titan != null) titanTarget = titan.transform;
+		}
+	}
 
 	private void OnTriggerEnter(Collider other)
 	{

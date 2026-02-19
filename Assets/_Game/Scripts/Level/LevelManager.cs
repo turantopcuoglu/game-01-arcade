@@ -14,6 +14,7 @@ public class LevelManager : MonoBehaviour
 	[Header("Scene References")]
 	[SerializeField] private Transform levelParent;
 
+	[SerializeField] private GameObject _LevelBindingsRoot;
 	private GameObject _currentLevelInstance;
 
 	public LevelData CurrentLevelData { get; private set; }
@@ -51,6 +52,11 @@ public class LevelManager : MonoBehaviour
 				Quaternion.identity,
 				levelParent
 			);
+
+			// Auto-resolve external dependencies for prefab components
+			var bindables = _currentLevelInstance.GetComponentsInChildren<IAutoBindable>();
+			foreach (var bindable in bindables)
+				bindable.AutoBind(_LevelBindingsRoot);
 		}
 
 		OnLevelLoaded?.Invoke(CurrentLevelData);
