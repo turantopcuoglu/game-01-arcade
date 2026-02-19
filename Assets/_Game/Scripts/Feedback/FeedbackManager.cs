@@ -15,7 +15,7 @@ public class FeedbackManager : MonoBehaviour
 	public static FeedbackManager Instance { get; private set; }
 
 	[Header("References")]
-	[SerializeField] private GameCamera gameCamera;
+	[SerializeField] private CinemachineShake cinemachineShake;
 
 	[Header("Shake Intensities")]
 	[SerializeField] private float grindTickShake = 0.04f;
@@ -87,7 +87,7 @@ public class FeedbackManager : MonoBehaviour
 	private void HandleGrindTick()
 	{
 		Haptics.Impact();
-		gameCamera?.Shake(grindTickShake);
+		cinemachineShake?.Shake(grindTickShake);
 	}
 
 	private void HandleGrindStopped()
@@ -100,8 +100,8 @@ public class FeedbackManager : MonoBehaviour
 		// Heavy feedback burst
 		Haptics.Impact();
 		AudioService.Instance?.PlayCollision();
-		gameCamera?.Shake(obstacleBreakShake);
-		gameCamera?.PunchFOV(obstacleBreakFOV);
+		cinemachineShake?.Shake(obstacleBreakShake);
+		cinemachineShake?.PunchFOV(obstacleBreakFOV);
 
 		// Brief slow-motion snap
 		Time.timeScale = breakSlowScale;
@@ -126,7 +126,7 @@ public class FeedbackManager : MonoBehaviour
 	private void HandleHardObstacleHit(Vector3 position)
 	{
 		Haptics.Impact();
-		gameCamera?.Shake(hardObstacleHitShake);
+		cinemachineShake?.Shake(hardObstacleHitShake);
 	}
 
 	private void HandleTitanProgress(float progress)
