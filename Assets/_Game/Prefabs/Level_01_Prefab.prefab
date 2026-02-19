@@ -511,6 +511,9 @@ MonoBehaviour:
   titanTarget: {fileID: 438262270484335425}
   scrapLaunchSpeed: 20
   launchInterval: 0.05
+  titanCam: {fileID: 0}
+  finishingCamPriority: 20
+  winPanelDelay: 0.5
 --- !u!1 &4435196096722822328
 GameObject:
   m_ObjectHideFlags: 0
