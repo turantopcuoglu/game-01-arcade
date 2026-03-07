@@ -91,6 +91,8 @@ public class ObstacleBase : MonoBehaviour, IDamageable
 		if (!_isGrinding) return;
 
 		_isGrinding = false;
+
+		bool noScrapsLeft = _grindingVortex != null && _grindingVortex.Count <= 0;
 		_grindingVortex = null;
 
 		if (_grindingPlayer != null)
@@ -100,6 +102,9 @@ public class ObstacleBase : MonoBehaviour, IDamageable
 		}
 
 		GameEvents.GrindStopped();
+
+		if (noScrapsLeft && GameManagerTT.Instance.ScrapCount <= 0)
+			GameManagerTT.Instance.UpdateState(GameState.Fail);
 	}
 
 	private void GrindTick()
@@ -107,8 +112,6 @@ public class ObstacleBase : MonoBehaviour, IDamageable
 		if (_grindingVortex == null || _grindingVortex.Count == 0)
 		{
 			StopGrinding();
-			if (GameManagerTT.Instance.ScrapCount <= 0)
-				GameManagerTT.Instance.UpdateState(GameState.Fail);
 			return;
 		}
 
