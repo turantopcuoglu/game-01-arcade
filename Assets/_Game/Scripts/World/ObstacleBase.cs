@@ -19,9 +19,7 @@ public class ObstacleBase : MonoBehaviour, IDamageable
 	[SerializeField] private float grindInterval = 0.1f;
 
 	[Header("Break Effect")]
-	[SerializeField] private float explosionForce = 300f;
-	[SerializeField] private float explosionRadius = 3f;
-	[SerializeField] private GameObject piecesRoot;
+	[SerializeField] private ParticleSystem explosionParticle;
 
 	private int _currentHP;
 	private bool _isGrinding;
@@ -144,24 +142,13 @@ public class ObstacleBase : MonoBehaviour, IDamageable
 		// Notify via event bus (FeedbackManager handles audio/haptics/camera)
 		GameEvents.ObstacleDestroyed(this);
 
-		if (piecesRoot != null)
-			piecesRoot.SetActive(true);
-
-		// Scatter child rigidbodies with explosion force
-		var children = GetComponentsInChildren<Rigidbody>();
-		foreach (var rb in children)
-		{
-			rb.isKinematic = false;
-			rb.AddExplosionForce(explosionForce, transform.position, explosionRadius);
-		}
-
-		if (children.Length == 0)
-			gameObject.SetActive(false);
+		if (explosionParticle != null)
+			explosionParticle.Play();
 
 		var col = GetComponent<Collider>();
 		if (col != null) col.enabled = false;
 
-		var mesh = GetComponent<MeshRenderer>();
+		var mesh = GetComponentInChildren<MeshRenderer>();
 		if (mesh != null) mesh.enabled = false;
 
 		Destroy(gameObject, 2f);

@@ -6,6 +6,7 @@ public class PassingEffect : MonoBehaviour
 {
 	public static PassingEffect Instance { get; private set; }
 	private bool _isPlaying;
+	private Action _onScreenCovered;
 
 	[SerializeField] private Animator transactionAnimator;
 
@@ -22,18 +23,18 @@ public class PassingEffect : MonoBehaviour
 	public void Play(Action onScreenCovered = null)
 	{
 		if (_isPlaying) return;
+		_onScreenCovered = onScreenCovered;
 		transactionAnimator.SetTrigger("StartTransition");
-		Invoke("OnTransitionStart", 0.1f); // Delay to ensure the animation starts before setting the flag
-		Invoke("OnTransitionEnd", 1.5f); // Adjust this delay based on your animation length)
+		Invoke("OnTransitionStart", 0.1f);
+		Invoke("OnTransitionEnd", 1.8f);
 	}
 
 	public void PlayWithSceneReload()
 	{
 		if (_isPlaying) return;
 		transactionAnimator.SetTrigger("StartTransition");
-		Invoke("OnTransitionStart", 0.1f); // Delay to ensure the animation starts before setting the flag
-		Invoke("OnTransitionEnd", 1.5f); // Adjust this delay based on your animation length)
-
+		Invoke("OnTransitionStart", 0.1f);
+		Invoke("OnTransitionEnd", 1.8f);
 	}
 
 	private void OnTransitionStart()
@@ -44,8 +45,10 @@ public class PassingEffect : MonoBehaviour
 	private void OnTransitionEnd()
 	{
 		_isPlaying = false;
+		_onScreenCovered?.Invoke();
+		_onScreenCovered = null;
 	}
 
 	public bool IsPlaying => _isPlaying;
-	
+
 }

@@ -29,6 +29,8 @@ public class PlayerController : MonoBehaviour
 	[SerializeField] private float inputSmoothSpeed = 10f;
 	[SerializeField] private float maxSwerveX = 3.5f;
 
+	[SerializeField] private Animator animator;
+
 	private float _currentSpeed;
 	private float _targetSpeed;
 	private bool _isMoving;
@@ -67,6 +69,7 @@ public class PlayerController : MonoBehaviour
 		{
 			case GameState.Gameplay:
 				_isMoving = true;
+				animator.SetBool("isPlaying", true);
 				_targetSpeed = normalSpeed;
 				break;
 			case GameState.Grinding:
@@ -74,8 +77,14 @@ public class PlayerController : MonoBehaviour
 				_targetSpeed = grindSpeed;
 				break;
 			case GameState.Finishing:
+				_isMoving = false;
+				animator.SetTrigger("Win");
+				break;
 			case GameState.Win:
 			case GameState.Fail:
+				_isMoving = false;
+				animator.SetTrigger("Lose");
+				break;
 			case GameState.Pause:
 			case GameState.Menu:
 				_isMoving = false;
