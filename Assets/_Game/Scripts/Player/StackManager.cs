@@ -185,6 +185,21 @@ public class StackManager : MonoBehaviour
 		}
 	}
 
+	// ── Clear All (for restart) ───────────────────────
+
+	public void ClearAllScraps()
+	{
+		for (int i = _scraps.Count - 1; i >= 0; i--)
+		{
+			if (_scraps[i] != null)
+				Destroy(_scraps[i].gameObject);
+		}
+		_scraps.Clear();
+		_orbitAngle = 0f;
+		_currentOrbitSpeed = orbitSpeed;
+		_targetOrbitSpeed = orbitSpeed;
+	}
+
 	// ── Release All (for Titan launch) ─────────────────
 
 	public List<ScrapItem> ReleaseAll()

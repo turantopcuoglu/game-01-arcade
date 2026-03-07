@@ -41,7 +41,17 @@ public class PlayerController : MonoBehaviour
 	private float _joystickInput;   // Raw normalized input -1 to 1
 	private float _smoothedInput;   // Smoothed input for movement
 
+	// Spawn state (saved on Start for restart)
+	private Vector3 _spawnPosition;
+	private Quaternion _spawnRotation;
+
 	public float CurrentSpeed => _currentSpeed;
+
+	private void Start()
+	{
+		_spawnPosition = transform.position;
+		_spawnRotation = transform.rotation;
+	}
 
 	private void OnEnable()
 	{
@@ -152,6 +162,24 @@ public class PlayerController : MonoBehaviour
 		pos.x = Mathf.Clamp(pos.x, -maxSwerveX, maxSwerveX);
 
 		transform.position = pos;
+	}
+
+	public void ResetToStart()
+	{
+		transform.position = _spawnPosition;
+		transform.rotation = _spawnRotation;
+
+		_currentSpeed = 0f;
+		_targetSpeed = 0f;
+		_isMoving = false;
+		_isDragging = false;
+		_joystickInput = 0f;
+		_smoothedInput = 0f;
+
+		animator.ResetTrigger("Win");
+		animator.ResetTrigger("Lose");
+		animator.SetBool("isPlaying", false);
+		animator.Play("Idle", 0, 0f);
 	}
 
 	public void SetGrinding(bool grinding)

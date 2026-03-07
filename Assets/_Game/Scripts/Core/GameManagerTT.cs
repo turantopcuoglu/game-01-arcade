@@ -116,6 +116,38 @@ public class GameManagerTT : MonoBehaviour
 	{
 	}
 
+	// --- Restart ---
+
+	/// <summary>
+	/// Resets the entire level in-place without reloading the scene.
+	/// 1) Clears orbiting scraps  2) Resets player  3) Reloads level prefab  4) Returns to Menu state
+	/// </summary>
+	public void RestartLevel()
+	{
+		// 1 — Destroy orbiting scraps (they are un-parented from level)
+		var vortex = FindObjectOfType<StackManager>();
+		if (vortex != null)
+			vortex.ClearAllScraps();
+
+		// 2 — Reset player position & animation
+		var player = FindObjectOfType<PlayerController>();
+		if (player != null)
+			player.ResetToStart();
+
+		// 3 — Reset scrap count
+		ScrapCount = 0;
+
+		// 4 — Reload the level prefab (destroy + re-instantiate)
+		LevelManager.Instance.ReloadCurrentLevel();
+
+		// 5 — Ensure timeScale is normal
+		Time.timeScale = 1f;
+
+		// 6 — Force state back to Menu (bypass duplicate check)
+		CurrentState = GameState.Boot;
+		UpdateState(GameState.Menu);
+	}
+
 	// --- Scrap API (called by VortexManager) ---
 
 	public void InitScrapCount(int count)

@@ -31,10 +31,11 @@ public class PassingEffect : MonoBehaviour
 
 	public void PlayWithSceneReload()
 	{
-		if (_isPlaying) return;
-		transactionAnimator.SetTrigger("StartTransition");
-		Invoke("OnTransitionStart", 0.1f);
-		Invoke("OnTransitionEnd", 1.8f);
+		Play(() =>
+		{
+			UnityEngine.SceneManagement.SceneManager.LoadScene(
+				UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+		});
 	}
 
 	private void OnTransitionStart()
