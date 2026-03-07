@@ -96,11 +96,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56a4470e6bf973a47848b4ef4ef0e30e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHP: 2
+  maxHP: 10
   isIndestructible: 0
   grindInterval: 0.1
-  explosionForce: 300
-  explosionRadius: 3
   explosionParticle: {fileID: 6923316315965607569}
 --- !u!1 &7806079285497440413
 GameObject:

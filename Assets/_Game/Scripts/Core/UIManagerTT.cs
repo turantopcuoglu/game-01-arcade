@@ -13,7 +13,6 @@ public class UIManagerTT : MonoBehaviour
 	[SerializeField] private Transform failPanel;
 
 	[Header("Menu Settings")]
-	[SerializeField][Range(0f, 1f)] private float menuAlpha = 0.4f;
 	[SerializeField] private float playDelay = 1.5f;
 
 	[Header("HUD Elements")]
@@ -74,8 +73,6 @@ public class UIManagerTT : MonoBehaviour
 				break;
 			case GameState.Menu:
 				SetPanel(menuPanel);
-				if (_menuCanvasGroup != null)
-					_menuCanvasGroup.alpha = menuAlpha;
 				if (levelText != null)
 					levelText.text = $"Level {GameManagerTT.Instance.CurrentLevel}";
 				break;
