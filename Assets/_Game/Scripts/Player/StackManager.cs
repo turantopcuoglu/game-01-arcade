@@ -19,21 +19,49 @@ public class StackManager : MonoBehaviour
 	[SerializeField] private float orbitHeight = 0.5f;
 	[SerializeField] private int scrapsPerLayer = 8;
 
+	[Header("Grinding Orbit")]
+	[SerializeField] private float grindOrbitSpeed = 1080f;
+	[SerializeField] private float grindSpeedLerpRate = 10f;
+
 	[Header("Spawning (for Gate + operations)")]
 	[SerializeField] private GameObject scrapPrefab;
 
 	private readonly List<ScrapItem> _scraps = new List<ScrapItem>();
 	private float _orbitAngle;
+	private float _currentOrbitSpeed;
+	private float _targetOrbitSpeed;
 
 	public int Count => _scraps.Count;
 
 	public event Action<int> OnScrapRemoved;
 
+	private void Start()
+	{
+		_currentOrbitSpeed = orbitSpeed;
+		_targetOrbitSpeed = orbitSpeed;
+	}
+
+	private void OnEnable()
+	{
+		GameEvents.OnGrindStarted += HandleGrindStarted;
+		GameEvents.OnGrindStopped += HandleGrindStopped;
+	}
+
+	private void OnDisable()
+	{
+		GameEvents.OnGrindStarted -= HandleGrindStarted;
+		GameEvents.OnGrindStopped -= HandleGrindStopped;
+	}
+
+	private void HandleGrindStarted() => _targetOrbitSpeed = grindOrbitSpeed;
+	private void HandleGrindStopped() => _targetOrbitSpeed = orbitSpeed;
+
 	private void Update()
 	{
 		if (_scraps.Count == 0) return;
 
-		_orbitAngle += orbitSpeed * Time.deltaTime;
+		_currentOrbitSpeed = Mathf.Lerp(_currentOrbitSpeed, _targetOrbitSpeed, grindSpeedLerpRate * Time.deltaTime);
+		_orbitAngle += _currentOrbitSpeed * Time.deltaTime;
 
 		for (int i = _scraps.Count - 1; i >= 0; i--)
 		{
