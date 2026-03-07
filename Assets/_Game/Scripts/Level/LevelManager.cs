@@ -73,6 +73,13 @@ public class LevelManager : MonoBehaviour
 	{
 		if (_currentLevelInstance != null)
 		{
+			// Reset camera priorities synchronously before Destroy.
+			// Destroy is deferred to end-of-frame, so relying on OnDestroy
+			// would let the new level's AutoBind read a dirty titanCam priority.
+			var finishLine = _currentLevelInstance.GetComponentInChildren<FinishLine>();
+			if (finishLine != null)
+				finishLine.ResetCamera();
+
 			Destroy(_currentLevelInstance);
 			_currentLevelInstance = null;
 		}

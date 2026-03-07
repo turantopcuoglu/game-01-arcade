@@ -41,7 +41,12 @@ public class FinishLine : MonoBehaviour, IAutoBindable
 		}
 	}
 
-	private void OnDestroy()
+	/// <summary>
+	/// Resets titanCam priority to its original value.
+	/// Must be called synchronously before Destroy (OnDestroy is deferred
+	/// and would fire after the new level's AutoBind reads the dirty priority).
+	/// </summary>
+	public void ResetCamera()
 	{
 		if (titanCam != null)
 			titanCam.Priority = _originalCamPriority;
