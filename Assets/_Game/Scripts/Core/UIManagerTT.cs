@@ -61,6 +61,8 @@ public class UIManagerTT : MonoBehaviour
 				break;
 			case GameState.Menu:
 				SetPanel(menuPanel);
+				if (levelText != null)
+					levelText.text = $"Level {GameManagerTT.Instance.CurrentLevel}";
 				break;
 			case GameState.Gameplay:
 			case GameState.Grinding:
@@ -117,12 +119,14 @@ public class UIManagerTT : MonoBehaviour
 	{
 		if (PassingEffect.Instance != null)
 		{
-			PassingEffect.Instance.PlayWithSceneReload();
+			PassingEffect.Instance.Play(() =>
+			{
+				GameManagerTT.Instance.RestartLevel();
+			});
 		}
 		else
 		{
-			UnityEngine.SceneManagement.SceneManager.LoadScene(
-				UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+			GameManagerTT.Instance.RestartLevel();
 		}
 	}
 

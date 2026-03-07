@@ -63,6 +63,12 @@ public class LevelManager : MonoBehaviour
 		GameEvents.LevelLoaded(CurrentLevelData);
 	}
 
+	public void ReloadCurrentLevel()
+	{
+		int levelIndex = GameManagerTT.Instance.CurrentLevel - 1;
+		LoadLevel(levelIndex);
+	}
+
 	public void ClearLevel()
 	{
 		if (_currentLevelInstance != null)
