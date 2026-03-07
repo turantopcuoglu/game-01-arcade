@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using TMPro;
 
@@ -11,11 +12,16 @@ public class UIManagerTT : MonoBehaviour
 	[SerializeField] private Transform winPanel;
 	[SerializeField] private Transform failPanel;
 
+	[Header("Menu Settings")]
+	[SerializeField][Range(0f, 1f)] private float menuAlpha = 0.4f;
+	[SerializeField] private float playDelay = 1.5f;
+
 	[Header("HUD Elements")]
 	[SerializeField] private TMP_Text scrapCountText;
 	[SerializeField] private TMP_Text levelText;
 
 	private Transform[] _allPanels;
+	private CanvasGroup _menuCanvasGroup;
 
 	private void Awake()
 	{
@@ -28,6 +34,13 @@ public class UIManagerTT : MonoBehaviour
 			winPanel,
 			failPanel
 		};
+
+		if (menuPanel != null)
+		{
+			_menuCanvasGroup = menuPanel.GetComponent<CanvasGroup>();
+			if (_menuCanvasGroup == null)
+				_menuCanvasGroup = menuPanel.gameObject.AddComponent<CanvasGroup>();
+		}
 
 		GameManagerTT.Instance.OnStateChanged += OnGameStateChanged;
 		GameManagerTT.Instance.OnScrapCountChanged += OnScrapCountChanged;
@@ -61,6 +74,8 @@ public class UIManagerTT : MonoBehaviour
 				break;
 			case GameState.Menu:
 				SetPanel(menuPanel);
+				if (_menuCanvasGroup != null)
+					_menuCanvasGroup.alpha = menuAlpha;
 				if (levelText != null)
 					levelText.text = $"Level {GameManagerTT.Instance.CurrentLevel}";
 				break;
@@ -97,17 +112,16 @@ public class UIManagerTT : MonoBehaviour
 
 	public void OnPlayButtonPressed()
 	{
-		if (PassingEffect.Instance != null)
-		{
-			PassingEffect.Instance.Play(() =>
-			{
-				GameManagerTT.Instance.UpdateState(GameState.Gameplay);
-			});
-		}
-		else
-		{
-			GameManagerTT.Instance.UpdateState(GameState.Gameplay);
-		}
+		if (menuPanel != null)
+			menuPanel.gameObject.SetActive(false);
+
+		StartCoroutine(StartGameplayAfterDelay());
+	}
+
+	private IEnumerator StartGameplayAfterDelay()
+	{
+		yield return new WaitForSeconds(playDelay);
+		GameManagerTT.Instance.UpdateState(GameState.Gameplay);
 	}
 
 	public void OnResumeButtonPressed()
