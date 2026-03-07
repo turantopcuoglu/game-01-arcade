@@ -24,7 +24,7 @@ public class StackManager : MonoBehaviour
 	[SerializeField] private float grindSpeedLerpRate = 10f;
 
 	[Header("Spawning (for Gate + operations)")]
-	[SerializeField] private GameObject scrapPrefab;
+	[SerializeField] private List<GameObject> scrapPrefabs = new List<GameObject>();
 
 	private readonly List<ScrapItem> _scraps = new List<ScrapItem>();
 	private float _orbitAngle;
@@ -164,7 +164,7 @@ public class StackManager : MonoBehaviour
 	/// </summary>
 	private void SpawnScraps(int count)
 	{
-		if (scrapPrefab == null)
+		if (scrapPrefabs == null || scrapPrefabs.Count == 0)
 		{
 			// Fallback: just update the count without visual scraps
 			for (int i = 0; i < count; i++)
@@ -174,8 +174,9 @@ public class StackManager : MonoBehaviour
 
 		for (int i = 0; i < count; i++)
 		{
+			GameObject prefab = scrapPrefabs[UnityEngine.Random.Range(0, scrapPrefabs.Count)];
 			Vector3 spawnPos = transform.position + Vector3.up * 0.5f;
-			GameObject obj = Instantiate(scrapPrefab, spawnPos, Quaternion.identity);
+			GameObject obj = Instantiate(prefab, spawnPos, Quaternion.identity);
 			ScrapItem scrap = obj.GetComponent<ScrapItem>();
 
 			if (scrap != null)
