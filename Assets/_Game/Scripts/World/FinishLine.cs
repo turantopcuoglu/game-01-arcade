@@ -19,6 +19,7 @@ public class FinishLine : MonoBehaviour, IAutoBindable
 	[SerializeField] private float winPanelDelay = 0.5f;
 
 	private bool _triggered;
+	private int _originalCamPriority;
 
 	public void AutoBind(GameObject levelRoot)
 	{
@@ -28,6 +29,9 @@ public class FinishLine : MonoBehaviour, IAutoBindable
 		if (titanCam == null)
 			titanCam = FindObjectOfType<CinemachineVirtualCamera>();
 
+		if (titanCam != null)
+			_originalCamPriority = titanCam.Priority;
+
 		// Resolve titanTarget: find TitanController's transform
 		if (titanTarget == null)
 		{
@@ -35,6 +39,12 @@ public class FinishLine : MonoBehaviour, IAutoBindable
 			if (titan == null) titan = FindObjectOfType<TitanController>();
 			if (titan != null) titanTarget = titan.transform;
 		}
+	}
+
+	private void OnDestroy()
+	{
+		if (titanCam != null)
+			titanCam.Priority = _originalCamPriority;
 	}
 
 	private void OnTriggerEnter(Collider other)
